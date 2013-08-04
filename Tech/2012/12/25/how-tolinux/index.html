@@ -1,0 +1,377 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>
+      
+        [How To]在Linux下设置无线网络桥接 - 
+      
+      Ronald的部落格
+    </title>
+    <meta name="description" content="">
+    <meta name="author" content="Ronald Liu">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+
+    <script src="/assets/themes/hooligan/js/jquery.min.js"></script>
+    <script src="/assets/themes/hooligan/js/jquery.scrollTo.min.js"></script>
+    <script src="/assets/themes/hooligan/js/jPages.min.js"></script>
+    <script src="/assets/themes/hooligan/bootstrap/js/bootstrap.min.js"></script>
+    <script>
+	    $(function(){
+		    $("div.navHolder").jPages({
+			    containerID : "pageList",
+			    perPage: 5
+	    }); 
+    });
+    </script>
+
+    <link href="/assets/themes/hooligan/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/assets/themes/hooligan/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet">    
+    <link rel="stylesheet" type="text/css" href="/assets/themes/hooligan/css-social-buttons/css/zocial.stripped.css" />
+    <link href="/assets/themes/hooligan/css/pygments.css" rel="stylesheet" type="text/css" media="all">
+    <link href="/assets/themes/hooligan/css/darkstrap.css" rel="stylesheet" type="text/css" media="all">    
+    <link href="/assets/themes/hooligan/css/style.css?body=1" rel="stylesheet" type="text/css" media="all">
+    <link href="/assets/themes/hooligan/css/jPages.css" rel="stylesheet" type="text/css" media="all">
+
+    
+    <!-- fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>      
+
+
+          <a class="brand" href="/">Ronald的部落格</a>
+
+
+          <div class="nav-collapse">
+            <ul class="nav">
+              
+              
+              
+
+
+  
+    
+      
+      	
+      	<li><a href="/pages.html">Pages</a></li>
+      	
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/archive.html">Archive</a></li>
+      	
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/categories.html">Categories</a></li>
+      	
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/tags.html">Tags</a></li>
+      	
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+
+
+
+            </ul>
+            <ul class="nav pull-right social visible-desktop">
+              <li class="divider-vertical"></li>
+              
+                <li>
+                  <a href="https://www.github.com/Ronald-Liu" class="zocial github icon" target="_blank">
+                    <span class="hidden-desktop">Github</a>
+                  </a>
+                </li>
+              
+              
+                <li>
+                  <a href="https://profiles.google.com/" class="zocial googleplus icon" target="_blank">
+                    <span class="hidden-desktop">Google+</a>
+                  </a>
+                </li>
+                  
+              
+                <li>
+                  <a href="http://www.twitter.com/lzsdc01" class="zocial twitter icon" target="_blank">
+                  <span class="hidden-desktop">Twitter</a>
+                  </a>
+                </li>
+                                        
+              
+                <li>
+                  <a href="http://www.facebook.com/water.cn" class="zocial facebook icon" target="_blank">
+                    <span class="hidden-desktop">Facebook</a>
+                  </a>
+                </li>
+                         
+                                  
+              
+		
+                <li>
+                  <a href="http://feed.feedsky.com/Ronald" class="zocial rss icon" target="_blank">
+                    <span class="hidden-desktop">FeedSky</a>
+                  </a>
+                </li>
+              
+
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="content">
+        
+<div class="page-header">
+  <h1>
+    [How To]在Linux下设置无线网络桥接 <g:plusone></g:plusone>
+    
+  </h1>
+    <script type="text/javascript">
+      window.___gcfg = {
+         lang: 'zh-CN',
+         parsetags:'onload'
+      };
+
+      (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+      })();
+
+
+	//Generate table of content
+$(document).ready(function(){
+		$("h1").each(function(i){
+			if (i==0) return;
+			$(this).attr("id", "section"+i);
+			$("#toc").append("<li><a class='tocItem' itemID="+i+" href='#'>"+$(this).html()+"</a></li>");
+			});
+		$(".tocItem").click(function(){
+			var target = $("#section"+$(this).attr('itemID'));
+			$.scrollTo(target,800);
+			});
+		});
+    </script>
+
+</div>
+
+<div class="row">
+  <div class="span8">
+    <p>很多同学在说Linux下配置网络桥接不如Windows方便，如果要共享网络链接很麻烦。其实如果各位能到墙外查查看，很多博客都介绍了如何在Linux下做网络桥接的姿势和动作要领。这里为大家介绍一下。
+如果你遇到如下问题，这篇文章可以帮助你搞定。<br/>
+* 对如何在Linux下进行桥接完全没有概念<br/>
+* 在执行桥接命令时出现<code>cant add wlan0 to bridge br0: Operation not supported</code>。
+这是由于您的无线网卡没有处于AP模式。处于Managed模式的无线网卡无法进行桥接（不要挣扎了，Managed模式下的网卡没有足够多的信息做桥接，这是802.11规定的）。只要按如下所述使用hostapd即可解决问题<br/>
+* 在执行<code>iwconfig wlan0 mode Master</code>时出现错误</p>
+
+<pre><code>Error for wireless request "Set Mode" (8B06) :
+    SET failed on device wlan0 ; Invalid argument.
+</code></pre>
+
+<p>这说明您的网卡不支持硬件Master模式，您同样可以使用hostapd实现软Master模式解决问题。<br/>
+* 正确设置之后主机无法访问互联网。您可能需要刷新系统原有的路由表，并在br0上，而不是eth0上启动dhcpcd(dhclient)</p>
+
+<!--break-->
+
+
+<h1>内核和内核支持</h1>
+
+<p>使用bridge功能需要内核支持，大多数预编译内核（如Fedora, Ubuntu等发行版默认安装的内核）都内建了bridge支持。在自编译内核中，你需要启用Networking support --> Networking options --> 802.1d Ethernet Bridging。如果编译为模块，可以通过<code>modprobe bridge</code>将其加载。内核编译的知识和姿势请自行Google。</p>
+
+<h1>设置hostapd</h1>
+
+<p>我知道有大神可以打开原生的AP(Master)模式。但是不管您是否能通过iwconfig打开AP模式，我都建议使用hostapd设置。安装hostapd的方法请自行Google。大多数发行版可以使用软件包管理器安装。<br/>
+要设置一个简单的AP需要配置设置文件，以及启动hostapd程序。大多数操作都需要在root用户下操作。<br/>
+在你认为合适的地方建立内容如下所述，文件名不那么重要的文件<sup>_<sup>：</sup></sup></p>
+
+<pre><code>interface=wlan0
+driver=nl80211
+ssid=MyAP
+channel=1
+</code></pre>
+
+<p>这个文件使端口wlan0工作在1信道下，建立一个ssid为MyAP的热点。默认不启用加密。若需设置加密，或需要更多信息，请参考<a href="http://linuxwireless.org/en/users/Documentation/hostapd">这里</a><br/>
+使用命令<code>sudo hostapd /path/to/config/file</code>启动hostapd，注意需要提供绝对路径。</p>
+
+<h1>建立设置网络桥接</h1>
+
+<p>网络桥接的配置需要使用brctl命令，在Gentoo下通过`sudo emerge -av bridge-utils安装。
+下面这段命令用于建立一个名叫br0的网桥。并把 wlan0 和 eth0 加入网桥</p>
+
+<div class="highlight"><pre><code class="bash">ifconfig eth0 up
+ifconfig wlan0 up
+brctl addbr br0
+brctl addif br0 eth0
+brctl addif br0 wlan0
+ifconfig br0 up
+</code></pre></div>
+
+
+<p>如果没有返回错误，桥接就已经成功了。</p>
+
+<h1>新的路由项</h1>
+
+<p>需要注意的是，在完成桥接设置后，你需要重新设置路由表，使得default指向br0而不是eth0。要做到这一点，最方便的做法（如果你在一个使用dhcp的网络环境下）是使用<code>dhcpcd -k eth0 &amp;&amp; dhcpcd br0</code>来重新设置路由。如果没有DHCP，那您需要手动删除eth0上绑定的IP地址，并在br0上进行设置，最后更改相应的路由表项。我假设如果您会手动配置网络，一定知道我在说什么<sup>_*。</sup>
+如果您想更方便的设置，wicd中可以在preference中将wired interface改为br0，然后使用wicd进行配置。如果您这么做，在网桥消失之后（比如重启计算机之后）您需要将刚才的设置改回eth0。</p>
+
+    <hr>
+    <div class="pagination btn-group">
+      
+        <a class="btn prev" href="/2012/12/24/how-toftp-in-linux" title="[How To]同步FTP文件 in Linux">&larr; Previous</a>
+      
+        <a class="btn" href="/archive.html">Archive</a>
+      
+        <a class="btn next" href="/Tech/2012/12/25/tcpdnsdns" title="使用基于TCP的DNS解析服务防止DNS污染">Next &rarr;</a>
+      
+    </div>
+    <hr>
+    
+
+
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    
+    var disqus_shortname = 'ronaldliusblog'; // required: replace example with your forum shortname
+    
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+
+  </div>
+  
+  <div class="span4" >
+     <section>
+     <h3>Table of Contents</h3>
+     <div><ul id="toc"></ul></div>
+     </section>
+    <section>
+      <h4>Published</h4>
+      <div class="date"><span>25 December 2012</span></div>
+    </section>
+    
+      <section>
+        <h4>Category</h4>
+        <span class="category">
+          Tech
+        </span>
+      </section>
+         
+    
+      <section>
+        <h4>Tags</h4>
+        <ul class="tag_box">
+          
+          
+
+
+  
+     
+    	<li><a href="/tags.html#Linux-ref">Linux <span>2</span></a></li>
+     
+    	<li><a href="/tags.html#Network-ref">Network <span>1</span></a></li>
+    
+  
+
+
+
+        </ul>
+      </section>
+             
+  </div>
+</div>
+
+
+      </div>
+      <hr/>
+      <footer>
+      <p>
+      来自绝非上帝杰作的<a href="mailto://lzsdc01@gmail.com">Ronald Liu</a><br/>
+      感谢<a href="http://jekyllbootstrap.com" target="_blank" title="The Definitive Jekyll Blogging Framework">Jekyll</a> and <a href="http://github.com/dhulihan/hooligan" target="_blank">Hooligan</a>的强势驱动
+        </p>
+      </footer>
+    </div> <!-- /container -->
+    
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-37234381-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+  </body>
+</html>
+

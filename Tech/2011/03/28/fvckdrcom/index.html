@@ -1,0 +1,340 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>
+      
+        FvckDrcom项目总结和发布 - 
+      
+      Ronald的部落格
+    </title>
+    <meta name="description" content="">
+    <meta name="author" content="Ronald Liu">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+
+    <script src="/assets/themes/hooligan/js/jquery.min.js"></script>
+    <script src="/assets/themes/hooligan/js/jquery.scrollTo.min.js"></script>
+    <script src="/assets/themes/hooligan/js/jPages.min.js"></script>
+    <script src="/assets/themes/hooligan/bootstrap/js/bootstrap.min.js"></script>
+    <script>
+	    $(function(){
+		    $("div.navHolder").jPages({
+			    containerID : "pageList",
+			    perPage: 5
+	    }); 
+    });
+    </script>
+
+    <link href="/assets/themes/hooligan/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/assets/themes/hooligan/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet">    
+    <link rel="stylesheet" type="text/css" href="/assets/themes/hooligan/css-social-buttons/css/zocial.stripped.css" />
+    <link href="/assets/themes/hooligan/css/pygments.css" rel="stylesheet" type="text/css" media="all">
+    <link href="/assets/themes/hooligan/css/darkstrap.css" rel="stylesheet" type="text/css" media="all">    
+    <link href="/assets/themes/hooligan/css/style.css?body=1" rel="stylesheet" type="text/css" media="all">
+    <link href="/assets/themes/hooligan/css/jPages.css" rel="stylesheet" type="text/css" media="all">
+
+    
+    <!-- fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>      
+
+
+          <a class="brand" href="/">Ronald的部落格</a>
+
+
+          <div class="nav-collapse">
+            <ul class="nav">
+              
+              
+              
+
+
+  
+    
+      
+      	
+      	<li><a href="/pages.html">Pages</a></li>
+      	
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/archive.html">Archive</a></li>
+      	
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/categories.html">Categories</a></li>
+      	
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/tags.html">Tags</a></li>
+      	
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+
+
+
+            </ul>
+            <ul class="nav pull-right social visible-desktop">
+              <li class="divider-vertical"></li>
+              
+                <li>
+                  <a href="https://www.github.com/Ronald-Liu" class="zocial github icon" target="_blank">
+                    <span class="hidden-desktop">Github</a>
+                  </a>
+                </li>
+              
+              
+                <li>
+                  <a href="https://profiles.google.com/" class="zocial googleplus icon" target="_blank">
+                    <span class="hidden-desktop">Google+</a>
+                  </a>
+                </li>
+                  
+              
+                <li>
+                  <a href="http://www.twitter.com/lzsdc01" class="zocial twitter icon" target="_blank">
+                  <span class="hidden-desktop">Twitter</a>
+                  </a>
+                </li>
+                                        
+              
+                <li>
+                  <a href="http://www.facebook.com/water.cn" class="zocial facebook icon" target="_blank">
+                    <span class="hidden-desktop">Facebook</a>
+                  </a>
+                </li>
+                         
+                                  
+              
+		
+                <li>
+                  <a href="http://feed.feedsky.com/Ronald" class="zocial rss icon" target="_blank">
+                    <span class="hidden-desktop">FeedSky</a>
+                  </a>
+                </li>
+              
+
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="content">
+        
+<div class="page-header">
+  <h1>
+    FvckDrcom项目总结和发布 <g:plusone></g:plusone>
+    
+  </h1>
+    <script type="text/javascript">
+      window.___gcfg = {
+         lang: 'zh-CN',
+         parsetags:'onload'
+      };
+
+      (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+      })();
+
+
+	//Generate table of content
+$(document).ready(function(){
+		$("h1").each(function(i){
+			if (i==0) return;
+			$(this).attr("id", "section"+i);
+			$("#toc").append("<li><a class='tocItem' itemID="+i+" href='#'>"+$(this).html()+"</a></li>");
+			});
+		$(".tocItem").click(function(){
+			var target = $("#section"+$(this).attr('itemID'));
+			$.scrollTo(target,800);
+			});
+		});
+    </script>
+
+</div>
+
+<div class="row">
+  <div class="span8">
+    <p>上个周我们学校的网络进行了升级。同学们发现网速快了，但是不能共享上网了。于是本人打算搞一下破解。以前没什么经验，前前后后干了3天。虽然有些坎坷，但还是收获颇丰。</p>
+
+<!--break-->
+
+
+<p>这个项目的名字有点不和谐，大家忍忍啊。<br/>
+原来dr.com客户仅使用mac地址认证的方式来确认是否是真正的用户登录。因此可以通过更改路由器的Mac地址来欺骗并实现共享上网。这次升级之后，添加了IP地址确认。也就是对比进行认证的Ip地址（将会是路由器的外网地址）和本机的的内网地址是否一致来判断是否有路由器。这样一般的路由器共享方式就失效了。<br/>
+前几天跟ZZJ研究这个问题提出了一种凑合的方法，即使用一个虚拟的Loopback网卡来模拟一个正确的外部IP，从而欺骗Dr.com客户端。不过我是想更绝一些，连Mac地址的问题（总是要来回改）一起解决了。因此就想到进行这次项目<br/>
+破解的基本思路是使用劫持Dll的方式阻断dr.com客户端获取正常mac地址和ip地址的途径。提供假的（固定的）IP和Mac地址，破坏上述的认证过程，实现共享上网。<br/>
+以前被做过Dll劫持啊，走了很多弯路。不过最后还是做成功了，嘿嘿。<br/>
+源代码有兴趣的同学可以上我这里索取啊，lzsdc@yahoo.com.cn。<br/>
+程序还有很多不完善的地方，比如由于我懒得编GUI，配置文件的生成还要使用的命令行界面。希望有能力的同学帮下忙，大家一起为获取自由的互联网奋斗（不要想太多）。</p>
+
+<p>编译版和源代码在Google Code上托管<a href="http://code.google.com/p/fvck-dr-com/">fvck-dr-com</a><br/>
+- PS : 感谢ZZJ的64-bit编译版<br/>
+- PPS: 用路由器被发现的同学请自行配置路由器的iptables对TTL进行规则化<br/>
+- PSP: 目前已经不在虎溪很多年了。如果需要我做什么，请发送drcom.log和pcap文件用来分析。</p>
+
+    <hr>
+    <div class="pagination btn-group">
+      
+        <a class="btn prev" href="/Tech/2010/12/08/how-togoogle-chrome" title="[How to]如何获取Google Chrome离线安装包">&larr; Previous</a>
+      
+        <a class="btn" href="/archive.html">Archive</a>
+      
+        <a class="btn next" href="/2011/04/30/stdcallcdecl" title="stdcall和cdecl详解">Next &rarr;</a>
+      
+    </div>
+    <hr>
+    
+
+
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    
+    var disqus_shortname = 'ronaldliusblog'; // required: replace example with your forum shortname
+    
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+
+  </div>
+  
+  <div class="span4" >
+     <section>
+     <h3>Table of Contents</h3>
+     <div><ul id="toc"></ul></div>
+     </section>
+    <section>
+      <h4>Published</h4>
+      <div class="date"><span>28 March 2011</span></div>
+    </section>
+    
+      <section>
+        <h4>Category</h4>
+        <span class="category">
+          Tech
+        </span>
+      </section>
+         
+    
+      <section>
+        <h4>Tags</h4>
+        <ul class="tag_box">
+          
+          
+
+
+  
+     
+    	<li><a href="/tags.html#drcom-ref">drcom <span>1</span></a></li>
+     
+    	<li><a href="/tags.html#Windows-ref">Windows <span>1</span></a></li>
+     
+    	<li><a href="/tags.html#network-ref">network <span>1</span></a></li>
+    
+  
+
+
+
+        </ul>
+      </section>
+             
+  </div>
+</div>
+
+
+      </div>
+      <hr/>
+      <footer>
+      <p>
+      来自绝非上帝杰作的<a href="mailto://lzsdc01@gmail.com">Ronald Liu</a><br/>
+      感谢<a href="http://jekyllbootstrap.com" target="_blank" title="The Definitive Jekyll Blogging Framework">Jekyll</a> and <a href="http://github.com/dhulihan/hooligan" target="_blank">Hooligan</a>的强势驱动
+        </p>
+      </footer>
+    </div> <!-- /container -->
+    
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-37234381-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+  </body>
+</html>
+

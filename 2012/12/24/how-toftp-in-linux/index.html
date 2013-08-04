@@ -1,0 +1,351 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>
+      
+        [How To]同步FTP文件 in Linux - 
+      
+      Ronald的部落格
+    </title>
+    <meta name="description" content="">
+    <meta name="author" content="Ronald Liu">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+
+    <script src="/assets/themes/hooligan/js/jquery.min.js"></script>
+    <script src="/assets/themes/hooligan/js/jquery.scrollTo.min.js"></script>
+    <script src="/assets/themes/hooligan/js/jPages.min.js"></script>
+    <script src="/assets/themes/hooligan/bootstrap/js/bootstrap.min.js"></script>
+    <script>
+	    $(function(){
+		    $("div.navHolder").jPages({
+			    containerID : "pageList",
+			    perPage: 5
+	    }); 
+    });
+    </script>
+
+    <link href="/assets/themes/hooligan/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/assets/themes/hooligan/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet">    
+    <link rel="stylesheet" type="text/css" href="/assets/themes/hooligan/css-social-buttons/css/zocial.stripped.css" />
+    <link href="/assets/themes/hooligan/css/pygments.css" rel="stylesheet" type="text/css" media="all">
+    <link href="/assets/themes/hooligan/css/darkstrap.css" rel="stylesheet" type="text/css" media="all">    
+    <link href="/assets/themes/hooligan/css/style.css?body=1" rel="stylesheet" type="text/css" media="all">
+    <link href="/assets/themes/hooligan/css/jPages.css" rel="stylesheet" type="text/css" media="all">
+
+    
+    <!-- fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>      
+
+
+          <a class="brand" href="/">Ronald的部落格</a>
+
+
+          <div class="nav-collapse">
+            <ul class="nav">
+              
+              
+              
+
+
+  
+    
+      
+      	
+      	<li><a href="/pages.html">Pages</a></li>
+      	
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/archive.html">Archive</a></li>
+      	
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/categories.html">Categories</a></li>
+      	
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/tags.html">Tags</a></li>
+      	
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+
+
+
+            </ul>
+            <ul class="nav pull-right social visible-desktop">
+              <li class="divider-vertical"></li>
+              
+                <li>
+                  <a href="https://www.github.com/Ronald-Liu" class="zocial github icon" target="_blank">
+                    <span class="hidden-desktop">Github</a>
+                  </a>
+                </li>
+              
+              
+                <li>
+                  <a href="https://profiles.google.com/" class="zocial googleplus icon" target="_blank">
+                    <span class="hidden-desktop">Google+</a>
+                  </a>
+                </li>
+                  
+              
+                <li>
+                  <a href="http://www.twitter.com/lzsdc01" class="zocial twitter icon" target="_blank">
+                  <span class="hidden-desktop">Twitter</a>
+                  </a>
+                </li>
+                                        
+              
+                <li>
+                  <a href="http://www.facebook.com/water.cn" class="zocial facebook icon" target="_blank">
+                    <span class="hidden-desktop">Facebook</a>
+                  </a>
+                </li>
+                         
+                                  
+              
+		
+                <li>
+                  <a href="http://feed.feedsky.com/Ronald" class="zocial rss icon" target="_blank">
+                    <span class="hidden-desktop">FeedSky</a>
+                  </a>
+                </li>
+              
+
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="content">
+        
+<div class="page-header">
+  <h1>
+    [How To]同步FTP文件 in Linux <g:plusone></g:plusone>
+    
+  </h1>
+    <script type="text/javascript">
+      window.___gcfg = {
+         lang: 'zh-CN',
+         parsetags:'onload'
+      };
+
+      (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+      })();
+
+
+	//Generate table of content
+$(document).ready(function(){
+		$("h1").each(function(i){
+			if (i==0) return;
+			$(this).attr("id", "section"+i);
+			$("#toc").append("<li><a class='tocItem' itemID="+i+" href='#'>"+$(this).html()+"</a></li>");
+			});
+		$(".tocItem").click(function(){
+			var target = $("#section"+$(this).attr('itemID'));
+			$.scrollTo(target,800);
+			});
+		});
+    </script>
+
+</div>
+
+<div class="row">
+  <div class="span8">
+    <p>新博客是Jekyll生成的静态网页，每次发布文章都需要重新生成网页并提交到服务器上。目前使用的服务器提供FTP。因此如果能通过某种方式将生成完的静态数据通过简单的方式同步到服务器上，一定会很爽。</p>
+
+<!--break-->
+
+
+<p>Google了一下看到了<a href="http://www.kreci.net/linux/how-to-synchronize-your-files-by-ftp/">这篇</a>文章。这里转过来，方便不太懂英文的同学，以及被GFW折磨的同学。</p>
+
+<h2>1. 安装lftp</h2>
+
+<p>根据你的发行版不同，你需要使用不同的命令。比如我用的是Gentoo那么应该是这样的。</p>
+
+<div class="highlight"><pre><code class="bash"><span class="c"># emerge -av lftp</span>
+</code></pre></div>
+
+
+<p>其他发行版可以到网上找教程安装</p>
+
+<h2>2. 建立一个同步配置文件</h2>
+
+<p>对于我来说，我需要将<em>site目录下的文件同步到服务器的根目录。而服务器地址是ronald-liu.ftp.narod.ru。在</em>site目录之上的目录下创建一个upload.lftp文件，内容大概是</p>
+
+<div class="highlight"><pre><code class="bash">open ftp://ronald-liu.ftp.narod.ru
+user yourUsername yourPassword
+mirror --delete -R --only-newer ./_site/ /
+<span class="nb">exit</span>
+</code></pre></div>
+
+
+<p>各位根据自己的情况强势替换即可。</p>
+
+<h2>3.一句话同步</h2>
+
+<p>如下命令可以帮助你一句话同步目录。你可以把它写到一个脚本文件里。或者像我一样写到Rakefile里，方便生成之后立即进行同步</p>
+
+<div class="highlight"><pre><code class="bash">lftp -f -v upload.lftp
+</code></pre></div>
+
+
+
+
+    <hr>
+    <div class="pagination btn-group">
+      
+        <a class="btn prev" href="/2012/12/23/" title="新的一页(夜)">&larr; Previous</a>
+      
+        <a class="btn" href="/archive.html">Archive</a>
+      
+        <a class="btn next" href="/Tech/2012/12/25/how-tolinux" title="[How To]在Linux下设置无线网络桥接">Next &rarr;</a>
+      
+    </div>
+    <hr>
+    
+
+
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    
+    var disqus_shortname = 'ronaldliusblog'; // required: replace example with your forum shortname
+    
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+
+  </div>
+  
+  <div class="span4" >
+     <section>
+     <h3>Table of Contents</h3>
+     <div><ul id="toc"></ul></div>
+     </section>
+    <section>
+      <h4>Published</h4>
+      <div class="date"><span>24 December 2012</span></div>
+    </section>
+         
+    
+      <section>
+        <h4>Tags</h4>
+        <ul class="tag_box">
+          
+          
+
+
+  
+     
+    	<li><a href="/tags.html#Linux-ref">Linux <span>2</span></a></li>
+    
+  
+
+
+
+        </ul>
+      </section>
+             
+  </div>
+</div>
+
+
+      </div>
+      <hr/>
+      <footer>
+      <p>
+      来自绝非上帝杰作的<a href="mailto://lzsdc01@gmail.com">Ronald Liu</a><br/>
+      感谢<a href="http://jekyllbootstrap.com" target="_blank" title="The Definitive Jekyll Blogging Framework">Jekyll</a> and <a href="http://github.com/dhulihan/hooligan" target="_blank">Hooligan</a>的强势驱动
+        </p>
+      </footer>
+    </div> <!-- /container -->
+    
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-37234381-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+  </body>
+</html>
+

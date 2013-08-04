@@ -1,0 +1,5 @@
+set ftp:passive-mode 1
+open ftp://ronald-liu.ftp.narod.ru
+user ronald.liu lzs7627548
+mirror --only-newer --delete -R  ./_site/ /
+exit
