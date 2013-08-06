@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <title>
       
-        [How To]同步FTP文件 in Linux - 
+        [How To]在Linux下设置无线网络桥接 - 
       
       Ronald的部落格
     </title>
@@ -179,7 +179,7 @@
         
 <div class="page-header">
   <h1>
-    [How To]同步FTP文件 in Linux <g:plusone></g:plusone>
+    [How To]在Linux下设置无线网络桥接 <g:plusone></g:plusone>
     
   </h1>
     <script type="text/javascript">
@@ -213,54 +213,65 @@ $(document).ready(function(){
 
 <div class="row">
   <div class="span8">
-    <p>新博客是Jekyll生成的静态网页，每次发布文章都需要重新生成网页并提交到服务器上。目前使用的服务器提供FTP。因此如果能通过某种方式将生成完的静态数据通过简单的方式同步到服务器上，一定会很爽。</p>
+    <p>很多同学在说Linux下配置网络桥接不如Windows方便，如果要共享网络链接很麻烦。其实如果各位能到墙外查查看，很多博客都介绍了如何在Linux下做网络桥接的姿势和动作要领。这里为大家介绍一下。
+如果你遇到如下问题，这篇文章可以帮助你搞定。<br/>
+* 对如何在Linux下进行桥接完全没有概念<br/>
+* 在执行桥接命令时出现<code>cant add wlan0 to bridge br0: Operation not supported</code>。
+这是由于您的无线网卡没有处于AP模式。处于Managed模式的无线网卡无法进行桥接（不要挣扎了，Managed模式下的网卡没有足够多的信息做桥接，这是802.11规定的）。只要按如下所述使用hostapd即可解决问题<br/>
+* 在执行<code>iwconfig wlan0 mode Master</code>时出现错误 <br/>
+    Error for wireless request "Set Mode" (8B06) :
+        SET failed on device wlan0 ; Invalid argument.
+这说明您的网卡不支持硬件Master模式，您同样可以使用hostapd实现软Master模式解决问题。<br/>
+* 正确设置之后主机无法访问互联网。您可能需要刷新系统原有的路由表，并在br0上，而不是eth0上启动dhcpcd(dhclient)</p>
 
 <!--break-->
 
 
-<p>Google了一下看到了<a href="http://www.kreci.net/linux/how-to-synchronize-your-files-by-ftp/">这篇</a>文章。这里转过来，方便不太懂英文的同学，以及被GFW折磨的同学。</p>
+<h1>内核和内核支持</h1>
 
-<h2>1. 安装lftp</h2>
+<p>使用bridge功能需要内核支持，大多数预编译内核（如Fedora, Ubuntu等发行版默认安装的内核）都内建了bridge支持。在自编译内核中，你需要启用Networking support --> Networking options --> 802.1d Ethernet Bridging。如果编译为模块，可以通过<code>modprobe bridge</code>将其加载。内核编译的知识和姿势请自行Google。</p>
 
-<p>根据你的发行版不同，你需要使用不同的命令。比如我用的是Gentoo那么应该是这样的。</p>
+<h1>设置hostapd</h1>
 
-<div class="highlight"><pre><code class="bash"><span class="c"># emerge -av lftp</span>
+<p>我知道有大神可以打开原生的AP(Master)模式。但是不管您是否能通过iwconfig打开AP模式，我都建议使用hostapd设置。安装hostapd的方法请自行Google。大多数发行版可以使用软件包管理器安装。<br/>
+要设置一个简单的AP需要配置设置文件，以及启动hostapd程序。大多数操作都需要在root用户下操作。<br/>
+在你认为合适的地方建立内容如下所述，文件名不那么重要的文件^_^：
+    interface=wlan0
+    driver=nl80211
+    ssid=MyAP
+    channel=1
+这个文件使端口wlan0工作在1信道下，建立一个ssid为MyAP的热点。默认不启用加密。若需设置加密，或需要更多信息，请参考<a href="http://linuxwireless.org/en/users/Documentation/hostapd">这里</a><br/>
+使用命令<code>sudo hostapd /path/to/config/file</code>启动hostapd，注意需要提供绝对路径。</p>
+
+<h1>建立设置网络桥接</h1>
+
+<p>网络桥接的配置需要使用brctl命令，在Gentoo下通过`sudo emerge -av bridge-utils安装。
+下面这段命令用于建立一个名叫br0的网桥。并把 wlan0 和 eth0 加入网桥</p>
+
+<div class="highlight"><pre><code class="bash">ifconfig eth0 up
+ifconfig wlan0 up
+brctl addbr br0
+brctl addif br0 eth0
+brctl addif br0 wlan0
+ifconfig br0 up
 </code></pre></div>
 
 
-<p>其他发行版可以到网上找教程安装</p>
+<p>如果没有返回错误，桥接就已经成功了。</p>
 
-<h2>2. 建立一个同步配置文件</h2>
+<h1>新的路由项</h1>
 
-<p>对于我来说，我需要将<em>site目录下的文件同步到服务器的根目录。而服务器地址是ronald-liu.ftp.narod.ru。在</em>site目录之上的目录下创建一个upload.lftp文件，内容大概是</p>
-
-<div class="highlight"><pre><code class="bash">open ftp://ronald-liu.ftp.narod.ru
-user yourUsername yourPassword
-mirror --delete -R --only-newer ./_site/ /
-<span class="nb">exit</span>
-</code></pre></div>
-
-
-<p>各位根据自己的情况强势替换即可。</p>
-
-<h2>3.一句话同步</h2>
-
-<p>如下命令可以帮助你一句话同步目录。你可以把它写到一个脚本文件里。或者像我一样写到Rakefile里，方便生成之后立即进行同步</p>
-
-<div class="highlight"><pre><code class="bash">lftp -f -v upload.lftp
-</code></pre></div>
-
-
-
+<p>需要注意的是，在完成桥接设置后，你需要重新设置路由表，使得default指向br0而不是eth0。要做到这一点，最方便的做法（如果你在一个使用dhcp的网络环境下）是使用<code>dhcpcd -k eth0 &amp;&amp; dhcpcd br0</code>来重新设置路由。如果没有DHCP，那您需要手动删除eth0上绑定的IP地址，并在br0上进行设置，最后更改相应的路由表项。我假设如果您会手动配置网络，一定知道我在说什么^_*。
+如果您想更方便的设置，wicd中可以在preference中将wired interface改为br0，然后使用wicd进行配置。如果您这么做，在网桥消失之后（比如重启计算机之后）您需要将刚才的设置改回eth0。</p>
 
     <hr>
     <div class="pagination btn-group">
       
-        <a class="btn prev" href="/2012/12/23/" title="新的一页(夜)">&larr; Previous</a>
+        <a class="btn prev" href="/2012/12/24/how-toftp-in-linux" title="[How To]同步FTP文件 in Linux">&larr; Previous</a>
       
         <a class="btn" href="/archive.html">Archive</a>
       
-        <a class="btn next" href="/tech/2012/12/25/how-tolinux" title="[How To]在Linux下设置无线网络桥接">Next &rarr;</a>
+        <a class="btn next" href="/tech/2012/12/25/tcpdnsdns" title="使用基于TCP的DNS解析服务防止DNS污染">Next &rarr;</a>
       
     </div>
     <hr>
@@ -294,8 +305,15 @@ mirror --delete -R --only-newer ./_site/ /
      </section>
     <section>
       <h4>Published</h4>
-      <div class="date"><span>24 December 2012</span></div>
+      <div class="date"><span>25 December 2012</span></div>
     </section>
+    
+      <section>
+        <h4>Category</h4>
+        <span class="category">
+          Tech
+        </span>
+      </section>
          
     
       <section>
@@ -308,6 +326,8 @@ mirror --delete -R --only-newer ./_site/ /
   
      
     	<li><a href="/tags.html#Linux-ref">Linux <span>2</span></a></li>
+     
+    	<li><a href="/tags.html#Network-ref">Network <span>1</span></a></li>
     
   
 

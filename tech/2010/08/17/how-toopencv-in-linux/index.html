@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <title>
       
-        [How To]同步FTP文件 in Linux - 
+        [How To]如何编译OpenCV程序 in Linux - 
       
       Ronald的部落格
     </title>
@@ -179,7 +179,7 @@
         
 <div class="page-header">
   <h1>
-    [How To]同步FTP文件 in Linux <g:plusone></g:plusone>
+    [How To]如何编译OpenCV程序 in Linux <g:plusone></g:plusone>
     
   </h1>
     <script type="text/javascript">
@@ -213,54 +213,59 @@ $(document).ready(function(){
 
 <div class="row">
   <div class="span8">
-    <p>新博客是Jekyll生成的静态网页，每次发布文章都需要重新生成网页并提交到服务器上。目前使用的服务器提供FTP。因此如果能通过某种方式将生成完的静态数据通过简单的方式同步到服务器上，一定会很爽。</p>
+    <p>当你完成了OpenCV的安装开始研究她时，要解决的第一个问题可能就是如何编译自己的程序。对于不是很喜欢用IDE的我，找到如何编译她确实让我废了一番劲。写这篇文章想帮大家少走点弯路。</p>
 
 <!--break-->
 
 
-<p>Google了一下看到了<a href="http://www.kreci.net/linux/how-to-synchronize-your-files-by-ftp/">这篇</a>文章。这里转过来，方便不太懂英文的同学，以及被GFW折磨的同学。</p>
 
-<h2>1. 安装lftp</h2>
 
-<p>根据你的发行版不同，你需要使用不同的命令。比如我用的是Gentoo那么应该是这样的。</p>
+<div class="highlight"><pre><code class="c"><span class="cp">#include &lt;opencv/highgui.h&gt;</span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span><span class="o">**</span> <span class="n">argv</span><span class="p">)</span>
+<span class="p">{</span>  
+    <span class="n">IplImage</span><span class="o">*</span> <span class="n">img</span><span class="o">=</span><span class="n">cvLoadImage</span><span class="p">(</span> <span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="p">,</span><span class="mi">0</span><span class="p">);</span> 
 
-<div class="highlight"><pre><code class="bash"><span class="c"># emerge -av lftp</span>
+    <span class="n">cvNamedWindow</span><span class="p">(</span><span class="s">&quot;test1&quot;</span><span class="p">,</span><span class="n">CV_WINDOW_AUTOSIZE</span><span class="p">);</span>
+    <span class="n">cvShowImage</span><span class="p">(</span><span class="s">&quot;test1&quot;</span><span class="p">,</span> <span class="n">img</span><span class="p">);</span>
+    <span class="n">cvWaitKey</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+    <span class="n">cvReleaseImage</span><span class="p">(</span><span class="o">&amp;</span><span class="n">img</span><span class="p">);</span>
+    <span class="n">cvDestroyWindow</span><span class="p">(</span><span class="s">&quot;test1&quot;</span><span class="p">);</span>
+
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
 </code></pre></div>
 
 
-<p>其他发行版可以到网上找教程安装</p>
+<p>一般来讲，这个从教程上搬下来的程序是可以编译通过的，但是如果不加配置的连接将会提示“找不到引用”的错误</p>
 
-<h2>2. 建立一个同步配置文件</h2>
+<p>问题出在正常安装OpenCV时，有关的五个重要动态库libcv.so libcxcore.so libml.so libhighgui.so libaux.so都位于/usr/local/lib中，而这个文件夹并不处于ld-linux.so的搜索列表内。所以链接器就不能找到所需要的动态库。这里需要注意的是linux中so文件既包括代码，也包括函数描述，因此不必像win中一样引用生成dll的.o文件。具体的机制我也在研究，很快再写一篇文章来讲。<br/>
+回到正题。<br/>
+关于如何将动态库加入到ld-linux.so搜索列表里的问题，网上有很多优秀的文章。不过我的性格是解决一切影响效率的因素。因此这里介绍种理论上讲更高效的做法。既添加相应的链接选项来进行编译。<br/>
+上述程序(testHighGui.c)用如下命令行编译可以成功生成可执行文件</p>
 
-<p>对于我来说，我需要将<em>site目录下的文件同步到服务器的根目录。而服务器地址是ronald-liu.ftp.narod.ru。在</em>site目录之上的目录下创建一个upload.lftp文件，内容大概是</p>
-
-<div class="highlight"><pre><code class="bash">open ftp://ronald-liu.ftp.narod.ru
-user yourUsername yourPassword
-mirror --delete -R --only-newer ./_site/ /
-<span class="nb">exit</span>
+<div class="highlight"><pre><code class="bash">gcc -L <span class="s1">&#39;/usr/local/lib&#39;</span> -lcv -lhighgui  -Wl,-rpath,/usr/local/lib testHighGui.c
 </code></pre></div>
 
 
-<p>各位根据自己的情况强势替换即可。</p>
+<p>句意很明确了就是指定编译器和链接器到指定的位置搜索libcv.so libhighgui.so。如果需要，你也许要加上-lml -laux -lcxcore 来进行链接。</p>
 
-<h2>3.一句话同步</h2>
+<p>对于/usr/local/lib出现了两次。我的解释是第一次是用作编译参数，第二次用作链接参数。也就是说如果第一个没有添加，程序在运行时会报错（缺少运行时动态库，系统没有搜索/usr/local/lib）。第二个用于指示链接器到指定位置搜索动态库进行链接，如果没有添加将会出现引用错误。</p>
 
-<p>如下命令可以帮助你一句话同步目录。你可以把它写到一个脚本文件里。或者像我一样写到Rakefile里，方便生成之后立即进行同步</p>
+<p>好啦。有什么问题欢迎和我联系啊。lzsdc@yahoo.com.cn</p>
 
-<div class="highlight"><pre><code class="bash">lftp -f -v upload.lftp
-</code></pre></div>
-
-
-
+<p>Tip:我做实验时出现了这样一个错误<br/>
+    terminate called after throwing an instance of 'std::logic_error'
+    what():  basic_string::_S_construct NULL not valid
+找了半天没发现问题，后来我发现。。。我没有输入图片路径，呃尴尬。同学们不要犯同样的错误啊。</p>
 
     <hr>
     <div class="pagination btn-group">
       
-        <a class="btn prev" href="/2012/12/23/" title="新的一页(夜)">&larr; Previous</a>
+        <a class="btn disabled prev">&larr; Previous</a>
       
         <a class="btn" href="/archive.html">Archive</a>
       
-        <a class="btn next" href="/tech/2012/12/25/how-tolinux" title="[How To]在Linux下设置无线网络桥接">Next &rarr;</a>
+        <a class="btn next" href="/tech/2010/12/08/how-togoogle-chrome" title="[How to]如何获取Google Chrome离线安装包">Next &rarr;</a>
       
     </div>
     <hr>
@@ -294,8 +299,15 @@ mirror --delete -R --only-newer ./_site/ /
      </section>
     <section>
       <h4>Published</h4>
-      <div class="date"><span>24 December 2012</span></div>
+      <div class="date"><span>17 August 2010</span></div>
     </section>
+    
+      <section>
+        <h4>Category</h4>
+        <span class="category">
+          Tech
+        </span>
+      </section>
          
     
       <section>
@@ -307,7 +319,9 @@ mirror --delete -R --only-newer ./_site/ /
 
   
      
-    	<li><a href="/tags.html#Linux-ref">Linux <span>2</span></a></li>
+    	<li><a href="/tags.html#OpenCV-ref">OpenCV <span>1</span></a></li>
+     
+    	<li><a href="/tags.html#C/C++-ref">C/C++ <span>1</span></a></li>
     
   
 

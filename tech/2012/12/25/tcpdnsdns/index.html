@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <title>
       
-        [How To]同步FTP文件 in Linux - 
+        使用基于TCP的DNS解析服务防止DNS污染 - 
       
       Ronald的部落格
     </title>
@@ -179,7 +179,7 @@
         
 <div class="page-header">
   <h1>
-    [How To]同步FTP文件 in Linux <g:plusone></g:plusone>
+    使用基于TCP的DNS解析服务防止DNS污染 <g:plusone></g:plusone>
     
   </h1>
     <script type="text/javascript">
@@ -213,54 +213,63 @@ $(document).ready(function(){
 
 <div class="row">
   <div class="span8">
-    <p>新博客是Jekyll生成的静态网页，每次发布文章都需要重新生成网页并提交到服务器上。目前使用的服务器提供FTP。因此如果能通过某种方式将生成完的静态数据通过简单的方式同步到服务器上，一定会很爽。</p>
+    <p>本文通过使用开源项目tcpdns帮助读者使用纯净的DNS服务。本文所提供的方案试图解决如下问题：<br/>
+*    大多数ISP网络中（避免使用代理，并高速的）访问被封锁的、有SSL而没被IP封锁的网站，其中比较著名的网站包括(Facebook, Google全系列服务, Youtube)。<br/>
+*    防止你的ISP通过DNS投毒插入广告</p>
 
 <!--break-->
 
 
-<p>Google了一下看到了<a href="http://www.kreci.net/linux/how-to-synchronize-your-files-by-ftp/">这篇</a>文章。这里转过来，方便不太懂英文的同学，以及被GFW折磨的同学。</p>
+<p>如果您对原理知识不感兴趣，您可以直接跳转到<a href="#usage">这里</a>了解具体的使用方法。</p>
 
-<h2>1. 安装lftp</h2>
+<h1>DNS污染</h1>
 
-<p>根据你的发行版不同，你需要使用不同的命令。比如我用的是Gentoo那么应该是这样的。</p>
+<p>在之前的文章中已经讲过关于DNS污染的相关问题，这里大概复述一下。DNS污染的主要症状是解析出的IP地址明显不合法，用浏览器访问时显示连接超时或找不到服务器。DNS污染的主要手段是ISP或GFW发现非法DNS请求时，冒充正常的DNS服务器发送错误的解析结果。</p>
 
-<div class="highlight"><pre><code class="bash"><span class="c"># emerge -av lftp</span>
-</code></pre></div>
+<h1>DNS污染的传统对策分析</h1>
 
+<p>应对DNS污染的传统对策包括：使用VPN、代理服务器、SOCKS5a标准端口转发等通用翻墙方法，以及修改Hosts文件的方法。同样，在CERNET2中的同学们也会使用hosts文件访问IPv6网站。以上方法的内在原理在于，通过可靠的信道获取正确的DNS信息，防止DNS污染。<br/>
+传统对策的弱点在于：<br/>
+1. 使用通用翻墙方法浪费大量代理服务器的带宽，事实上受污染的只有DNS数据，而代理服务器、VPN等通用翻墙方式将所有信息全部加密或通过代理转发。使用此方法的代价是传输速率的下降，以及严重依赖代理服务器的状态，设置复杂且容易出错。<br/>
+2. 使用hosts文件方法事实上相当于自己构建了一个保留了“纯净”DNS信息的DNS服务器副本。这种方法灵活性非常差，而且使用不甚方便。如果要在不同网络状况下切换，每次都需要对hosts文件进行修改。</p>
 
-<p>其他发行版可以到网上找教程安装</p>
+<h1>应对DNS污染的新思路</h1>
 
-<h2>2. 建立一个同步配置文件</h2>
+<p>通过分析发现，DNS污染之所以实现，是因为客户DNS请求使用UDP协议与服务器通信。UDP协议作为一个无连接协议，容易被中间人植入信息，并且难以被发现。GFW使用这个原理，冒充真正的DNS服务器发送错误的UDP包，从而使客户无法获得正确的IP地址。
+同时可以注意到的是，DNS协议同样可以基于TCP协议实现。而由于TCP 协议是有连接协议，植入信息需要动态的对数据流做分析。代价很大因此GFW并没做这么做。因此，如果使用基于TCP的DNS解析服务，就可以应对目前GFW的DNS污染。</p>
 
-<p>对于我来说，我需要将<em>site目录下的文件同步到服务器的根目录。而服务器地址是ronald-liu.ftp.narod.ru。在</em>site目录之上的目录下创建一个upload.lftp文件，内容大概是</p>
+<h1>解决方案和代码</h1>
 
-<div class="highlight"><pre><code class="bash">open ftp://ronald-liu.ftp.narod.ru
-user yourUsername yourPassword
-mirror --delete -R --only-newer ./_site/ /
-<span class="nb">exit</span>
-</code></pre></div>
+<h2>解决方案</h2>
 
+<p>由于大多数操作系统无法设置DNS为使用TCP连接。因此解决方案设计为，在本地设置一个简单的DNS代理，它接受从操作系统发出的DNS请求（基于UDP），然后向可信的DNS服务器发送内容相同，但基于TCP的DNS请求，获得结果后通过UDP返回给操作系统。在操作系统看来，上述过程完全是虚拟的。只需要将系统的DNS服务器设置为本机即可。<br/>
+<a href="https://github.com/henices/Tcp-DNS-proxy">这个项目</a> 用Python实现了上述方案。在此基础上，项目<a href="https://github.com/Ronald-Liu/Tcp-DNS-proxy">Ronald/TCP-DNS-Proxy</a> 为了方便更多人，尤其是Linux用户，的使用增加了对IPv6 DNS支持和自动修改resolv.conf的功能。<br/>
+<a id="usage" name="usage"></a></p>
 
-<p>各位根据自己的情况强势替换即可。</p>
+<h2>使用方法</h2>
 
-<h2>3.一句话同步</h2>
+<p>下载处于ipv6分支下的tcpdns.py
+你同样可以在本站下载稳定版的<a href="/files/tcpdns.py">tcpdns.py</a>文件</p>
 
-<p>如下命令可以帮助你一句话同步目录。你可以把它写到一个脚本文件里。或者像我一样写到Rakefile里，方便生成之后立即进行同步</p>
+<h3>Linux用户</h3>
 
-<div class="highlight"><pre><code class="bash">lftp -f -v upload.lftp
-</code></pre></div>
+<p>使用<code>sudo python tcpdns.py</code>启动。如果你使用DHCP，你可能需要手动在Network-Manager里或wicd里将DNS Server设置为127.0.0.1<br/>
+如果你使用带有OpenRC的系统（如Gentoo, Debian），下载位于ipv6分支下的tcp-dns-proxy（你同样可以在本站下载稳定版本<a href="/files/tcp-dns-proxy">tcp-dns-proxy</a>。编辑它，将APP_PATH设置为存放tcpdns.py的绝对地址。然后把tcp-dns-proxy 拷贝入/etc/init.d。最后用<code>sudo rc-update add tcp-dns-proxy default</code>使其默认启动。使用命令<code>sudo /etc/init.d/tcp-dns-proxy start</code>可以立即启动程序</p>
 
+<h3>Windows用户</h3>
 
-
+<p>安装Python 2.7运行时环境<br/>
+双击tcpdns.py<br/>
+设置系统DNS为127.0.0.1</p>
 
     <hr>
     <div class="pagination btn-group">
       
-        <a class="btn prev" href="/2012/12/23/" title="新的一页(夜)">&larr; Previous</a>
+        <a class="btn prev" href="/tech/2012/12/25/how-tolinux" title="[How To]在Linux下设置无线网络桥接">&larr; Previous</a>
       
         <a class="btn" href="/archive.html">Archive</a>
       
-        <a class="btn next" href="/tech/2012/12/25/how-tolinux" title="[How To]在Linux下设置无线网络桥接">Next &rarr;</a>
+        <a class="btn next" href="/po/2013/01/04/-" title="[转载]中国梦 宪政梦">Next &rarr;</a>
       
     </div>
     <hr>
@@ -294,8 +303,15 @@ mirror --delete -R --only-newer ./_site/ /
      </section>
     <section>
       <h4>Published</h4>
-      <div class="date"><span>24 December 2012</span></div>
+      <div class="date"><span>25 December 2012</span></div>
     </section>
+    
+      <section>
+        <h4>Category</h4>
+        <span class="category">
+          Tech
+        </span>
+      </section>
          
     
       <section>
@@ -307,7 +323,11 @@ mirror --delete -R --only-newer ./_site/ /
 
   
      
-    	<li><a href="/tags.html#Linux-ref">Linux <span>2</span></a></li>
+    	<li><a href="/tags.html#GFW-ref">GFW <span>1</span></a></li>
+     
+    	<li><a href="/tags.html#DNS-ref">DNS <span>1</span></a></li>
+     
+    	<li><a href="/tags.html#TCP-ref">TCP <span>1</span></a></li>
     
   
 
