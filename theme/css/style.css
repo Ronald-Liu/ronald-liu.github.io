@@ -2,8 +2,13 @@ body {
     padding-top: 70px;
 }
 
+small{
+    color: grey;
+}
+
 #sidebar .list-group, #sidebar .list-group-item {
     background-color: transparent;
+    padding-top: 3px;
 }
 
 .list-group-item {

@@ -1,0 +1,437 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Ronald的部落格</title><link href="http://srcflow.info/" rel="alternate"></link><link href="http://srcflow.info/feeds%5Call.atom.xml" rel="self"></link><id>http://srcflow.info/</id><updated>2013-11-15T21:53:23+08:00</updated><entry><title>在Visual Studio 2013上编译boost 1.55</title><link href="http://srcflow.info/visual-studio-2013boost-155.html" rel="alternate"></link><updated>2013-11-15T21:53:23+08:00</updated><author><name>Ronald Liu</name></author><id>tag:srcflow.info,2013-11-15:visual-studio-2013boost-155.html</id><summary type="html">&lt;p&gt;在Visual Studio 2013(msvc12)上编译boost 1.55确实不是很容易。网上的教程大多过于陈旧，还有几个与VS不兼容的问题还没有修复。这篇文章总结了如何编译安装64位版本的boost 1.55 beta 1、修复一些小Bug，以及如何设置Visual Studio进行boost开发。其中某些不兼容问题在1.54版本中依然存在，同样可以用本文中的方法解决。&lt;/p&gt;
+&lt;h1&gt;下载boost&lt;/h1&gt;
+&lt;p&gt;下载地址在&lt;a href="http://sourceforge.net/projects/boost/files/boost/1.55.0.beta.1/"&gt;这里&lt;/a&gt;
+下载7z比较小，实测在Windows上使用完全没有问题。另外需要注意的是，某些编译程序对中文的支持不完全，解压路径里不要含有中文。&lt;/p&gt;
+&lt;h1&gt;生成编译工具&lt;/h1&gt;
+&lt;p&gt;其实也不能算是编译工具啦，只是一个静态版的Makefile。
+首先打开命令提示符，需要注意的是，如果boost解压在系统目录（如Program Files目录），打开命令提示符必须选择以管理员身份打开。比较简单的方法是按Win+x键。在弹出的菜单里选“命令提示符（管理员）”。
+然后，切换到boost解压到的目录。输入命令bootstrap.bat回车。大概一两分钟的样子就可以生成出b2和bjam两个可执行文件。&lt;/p&gt;
+&lt;h2&gt;一点修改&lt;/h2&gt;
+&lt;p&gt;在我的编译过程中出现了一下几个错误，各位可以在编译之前先修改源代码，避免走弯路。两个Bug的ticket在&lt;a href="https://svn.boost.org/trac/boost/ticket/9196&amp;gt;"&gt;这里&lt;/a&gt;和&lt;a href="https://svn.boost.org/trac/boost/ticket/9205"&gt;这里&lt;/a&gt;。
+简单来说，需要修改的文件包括boost/mpl/assert.hpp和boost/archive/iterators/transform_width.hpp。其中
+boost/mpl/assert.hpp, line 137: &lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="cp"&gt;#if BOOST_WORKAROUND(BOOST_MSVC, &amp;gt;= 1700)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;改为&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="cp"&gt;#if BOOST_WORKAROUND(BOOST_MSVC, == 1700)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;boost/archive/iterators/transform_width.hpp 最开始增加&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="cp"&gt;#include&amp;lt;algorithm&amp;gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h2&gt;开始编译boost&lt;/h2&gt;
+&lt;p&gt;用下面的命令开始编译boost&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;b2 -j4
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;j4命令可以打开4线程并行编译（跟make一样~）。
+根据自己的应用特点可以编译特定的变种。比如如果只需要编译64位版本，就需要在参数中增加address-model=64。根据我自己的需要，我选择了只编译64位release库，4进程并行编译。具体命令是&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;b2 -q address-model&lt;span class="o"&gt;=&lt;/span&gt;64 &lt;span class="nv"&gt;toolset&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;msvc &lt;span class="nv"&gt;variant&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;release -j4
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;其中-q表示如果出现错误立即停止，这样有利于提早发现并解决boost中的Bug。
+编译，根据计算机的速度，可能会消耗10-40分钟不等的时间。&lt;/p&gt;
+&lt;h1&gt;设置Visual Studio(VC)项目&lt;/h1&gt;
+&lt;p&gt;打开需要使用Boost的项目，选择项目-&amp;gt;XX(你的项目名)属性，在平台中选择正确的平台(如果是64位系统需要选择x64)，选择正确的配置(如果使用release版本的库则选择Release)。在左侧的树状图中选择配置属性-&amp;gt;VC++目录。添加包含目录和库目录。假设boost解压完成的根目录为%boostRoot%（在我这里是D:\Program Files\boost\boost_1_55_0b1），则包含目录应该添加%boostRoot%，而库目录应该添加%boostRoot%\stage\lib。
+完成设置后可以用以下程序来测试设置是否正确&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="cp"&gt;#include &amp;lt;boost/thread/thread.hpp&amp;gt;&lt;/span&gt;
+&lt;span class="cp"&gt;#include &amp;lt;iostream&amp;gt;&lt;/span&gt;
+
+&lt;span class="kt"&gt;void&lt;/span&gt; &lt;span class="nf"&gt;hello&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;std&lt;/span&gt;&lt;span class="o"&gt;::&lt;/span&gt;&lt;span class="n"&gt;cout&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&amp;lt;&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;Hello world, I&amp;#39;m a thread!&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class="n"&gt;std&lt;/span&gt;&lt;span class="o"&gt;::&lt;/span&gt;&lt;span class="n"&gt;endl&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="nf"&gt;main&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;argc&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;char&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;argv&lt;/span&gt;&lt;span class="p"&gt;[])&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;boost&lt;/span&gt;&lt;span class="o"&gt;::&lt;/span&gt;&lt;span class="kr"&gt;thread&lt;/span&gt; &lt;span class="n"&gt;thrd&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;hello&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+    &lt;span class="n"&gt;thrd&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;join&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;</summary><category term="Visual Studio"></category><category term="boost"></category></entry><entry><title>[转载]中国梦 宪政梦</title><link href="http://srcflow.info/zhuan-zai-zhong-guo-meng-xian-zheng-meng.html" rel="alternate"></link><updated>2013-01-04T00:00:00+08:00</updated><author><name>Ronald Liu</name></author><id>tag:srcflow.info,2013-01-04:zhuan-zai-zhong-guo-meng-xian-zheng-meng.html</id><summary type="html">&lt;p&gt;南方周末2013年新年献辞，转载防河蟹&lt;/p&gt;
+&lt;hr /&gt;
+&lt;p&gt;天地之间，时间绽放。 
+这是我们在2013年的第一次相见，愿你被梦想点亮。 
+2012年，你守护自己的生活，他们守护自己的工作。守护这份工作，就是在守护他们对生活的梦想。 
+2012年，庙堂之上发出的宪政强音嗡然回响：“宪法的生命在于实施，宪法的权威也在于实施。”我们期待宪法长出牙齿，宪政早日落地。惟如此，才能成就这个沧桑古国的艰难转型；惟如此，国家与人民，才能重新站立于坚实的大地之上。 &lt;/p&gt;
+&lt;!--break--&gt;
+
+&lt;p&gt;今天，已是能够梦想的中国，今天，已是兑现梦想的时代。经历过宪政缺失的“文革”梦魇，我们花费三十多年的时间来逐渐回归常理与常情。从土地联产承包责任制到个体户、乡镇企业到“民企”，稍稍归还国人自主安排生活的权利，我们便创造了繁华城市，收获了满仓粮食。 
+我们重新体认什么是真，什么是假，是其是，非其非；我们重燃对公义的热爱，对自由的向往。面对暴虐强力，我们双手相握，一起走过艰难时刻，迎接生活转机。
+今天，我们终于可以从厚厚的历史尘埃中挺起胸，从琐碎的日常生活中抬起头，重走先辈的宪政长征，重温先辈的伟大梦想。 
+一百七十多年前，我们开始从天朝上国的迷梦中醒来。先败于英，后败于日。百姓愈加民不聊生，耻感深深刺痛中国士人。保国！保种！由洋务而君宪，由立宪而革命。从器物到制度再至文化，激愤者不惜彻底打倒“孔家店”，决绝地将自己的文明连根拔起。&lt;br /&gt;
+辛亥革命后，清帝退位，先辈们终于建立了亚洲第一个共和国。但是，一个自由、民主、富强的宪政中国并没有随之而来。&lt;br /&gt;
+国家内外，战争连连；人群内外，残酷不断。&lt;br /&gt;
+一度，人们远离仁，远离义，远离天道，远离对自由的坚守。 
+一度，人们认错为对，指鹿为马，万千生灵生机断绝。 
+美梦与山河，齐齐破碎。自由与宪政，双双消隐。 
+度尽人世劫波，深味人性幽暗，我们依然是能做梦的人，有颗能做梦的心。 
+今天，我们断断不只梦想物质丰盛，更希望性灵充盈；我们断断不只梦想国力能强盛，更希望国民有自尊。新民和新国，救亡与启蒙，谁也离不开谁，谁也不能压倒谁。而宪政便是这一切美梦的根基。&lt;br /&gt;
+兑现宪政，坚守权利，人人才能心如日月流光溢彩；鳏寡孤独才能感受冬日暖意而非瑟瑟发抖；“城管”与小贩才能谈笑风生；房屋才能成为自己与家人的城堡；&lt;br /&gt;
+兑现宪政，限权分权，公民们才能大声说出对公权力的批评；每个人才能依内心信仰自由生活；我们才能建成一个自由的强大国家。&lt;br /&gt;
+兑现宪政大梦，每个人才能做好个人的美梦。而这需要我们就从手边做起，就从守护此时此刻的生活做起，而不要将重任留给子孙。&lt;br /&gt;
+很多人一直深深懂得这一点，很多人早就努力践行这一点。&lt;br /&gt;
+不是杰出者才做梦，是善于做梦者才杰出。&lt;br /&gt;
+你的天赋权利就是可以梦想，并且兑现梦想！&lt;br /&gt;
+为你的梦想鼓掌，为这个国家的梦想加油，这就是很多新闻人的梦想，是他们不大不小的野心。他们忠于新闻，更忠于内心。愿你也有个玫瑰色的美梦；自由成就自己，完成天之所赋。  &lt;/p&gt;
+&lt;p&gt;总会梦想人人都可以做一个有尊严的人，不论身居高位，还是街头卖艺；&lt;br /&gt;
+总会梦想人人内心有爱，即使罪犯也未必穷凶极恶，总有恻隐之心自由闪动； 
+总会梦想阶层只是引人自由流动的动力，而不再是相互猜忌和仇视的天堑；总会梦想这五千年文明生生不息，为改善人类的现代处境，捧出一掬甘冽清泉……&lt;br /&gt;
+兑现这一千一万个梦想，才能抚平这一百多年的刻骨痛楚。&lt;br /&gt;
+兜兜转转一百七十年，美梦成真何其难！一百七十年后，依然有人渴望良知萌新芽，重温天命之谓性；依然有人坚持要求权利一一落地，政治复归于正，公义自在流淌。&lt;br /&gt;
+依然有人相信，不管多难，梦想终会落实为宪政良制，风行为敦敦美俗。&lt;br /&gt;
+先辈们筚路蓝缕，践义成仁。如今，后人承继其志，燃灯前行。&lt;br /&gt;
+兑现梦想，自然要借鉴前贤智慧，与古人的信仰、习俗和情感和解。儒释道法墨，百家皆是源泉；周汉唐宋明，代代皆有可取。&lt;br /&gt;
+但这决不是要复古，古人不能给予今天所需的一切。只是不再轻易贬损先辈，平心静气地吸收转进，以让中华文明开新花，结新果。 
+兑现梦想，自然要吸取世界经验。所以要认真审视希腊民主，罗马法治，借鉴英美宪政，追赶现代科技文明。&lt;br /&gt;
+但这也不是仅仅作一个西方文明的优等生，西人有西人演进的轨迹，同样未必能直接给予我们今天所需的一切。&lt;br /&gt;
+我们要站在自己的大地上，与各国人民一起，生活出一种古今相融的新生活，文明出一种中西合璧的新文明。在古今中西的激荡中，要遵循人类共通的价值，也要不惮于做自己的新梦。&lt;br /&gt;
+称美古人，赞扬邻居，不是因为他们足够完美，而是因为我们熟悉他们眼中洋溢的快乐，心底流淌的自由。 
+中国人本应就是自由人。中国梦本应就是宪政梦。&lt;br /&gt;
+宪政之下，才能国家持续强盛，宪政之下，才有人民真正强大。兑现宪政梦想，才能更好地外争国权，维护国家的自由；才能更好地内争民权，维护人民的自由。而国家的自由最终必得落脚于人民的自由，必得落脚于人人可以我口说我心，人人可以用心做美梦。&lt;br /&gt;
+生而为人，谁能不热爱自由？这自由，不仅是权利针对权力而言，也是宽恕针对报复而言，是般若针对无明而言，是仁爱针对暴虐而言，是有道针对无道而言。&lt;br /&gt;
+大道之行，天下为公；万物自在，各正性命。这就是古人的梦想，先辈的梦想，也是今天很多人的梦想。&lt;br /&gt;
+中国梦，自由梦，宪政梦。&lt;br /&gt;
+万物速朽，但梦想永在。万物诞生，因梦想不灭。梦想就是生生之几，就是当你失败了一百次，那第一百零一次充实你内心的不死之希望。&lt;br /&gt;
+依然有人倾听你的梦想，期待你敢于做梦。你从苦难中爬起，他们为你加油；你尝尽人世冷暖，他们为你加油；你收获美好生活，他们为你加油……他们别无所资，惟有对梦想的执着；他们别无所长，惟有对真相的追求。&lt;br /&gt;
+一句真话能比整个世界还重，一个梦想能让生命迸射光芒！&lt;/p&gt;</summary><category term="谈国是"></category></entry><entry><title>[How To]在Linux下设置无线网络桥接</title><link href="http://srcflow.info/how-tozai-linuxxia-she-zhi-wu-xian-wang-luo-qiao-jie.html" rel="alternate"></link><updated>2012-12-25T00:00:00+08:00</updated><author><name>Ronald Liu</name></author><id>tag:srcflow.info,2012-12-25:how-tozai-linuxxia-she-zhi-wu-xian-wang-luo-qiao-jie.html</id><summary type="html">&lt;p&gt;很多同学在说Linux下配置网络桥接不如Windows方便，如果要共享网络链接很麻烦。其实如果各位能到墙外查查看，很多博客都介绍了如何在Linux下做网络桥接的姿势和动作要领。这里为大家介绍一下。
+如果你遇到如下问题，这篇文章可以帮助你搞定。  &lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;对如何在Linux下进行桥接完全没有概念  &lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;在执行桥接命令时出现&lt;code&gt;cant add wlan0 to bridge br0: Operation not supported&lt;/code&gt;。
+这是由于您的无线网卡没有处于AP模式。处于Managed模式的无线网卡无法进行桥接（不要挣扎了，Managed模式下的网卡没有足够多的信息做桥接，这是802.11规定的）。只要按如下所述使用hostapd即可解决问题  &lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;在执行&lt;code&gt;iwconfig wlan0 mode Master&lt;/code&gt;时出现错误 &lt;br /&gt;
+    Error for wireless request "Set Mode" (8B06) :
+        SET failed on device wlan0 ; Invalid argument.
+这说明您的网卡不支持硬件Master模式，您同样可以使用hostapd实现软Master模式解决问题。  &lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;正确设置之后主机无法访问互联网。您可能需要刷新系统原有的路由表，并在br0上，而不是eth0上启动dhcpcd(dhclient)
+&lt;!--break--&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1&gt;内核和内核支持&lt;/h1&gt;
+&lt;p&gt;使用bridge功能需要内核支持，大多数预编译内核（如Fedora, Ubuntu等发行版默认安装的内核）都内建了bridge支持。在自编译内核中，你需要启用Networking support --&amp;gt; Networking options --&amp;gt; 802.1d Ethernet Bridging。如果编译为模块，可以通过&lt;code&gt;modprobe bridge&lt;/code&gt;将其加载。内核编译的知识和姿势请自行Google。&lt;/p&gt;
+&lt;h1&gt;设置hostapd&lt;/h1&gt;
+&lt;p&gt;我知道有大神可以打开原生的AP(Master)模式。但是不管您是否能通过iwconfig打开AP模式，我都建议使用hostapd设置。安装hostapd的方法请自行Google。大多数发行版可以使用软件包管理器安装。&lt;br /&gt;
+要设置一个简单的AP需要配置设置文件，以及启动hostapd程序。大多数操作都需要在root用户下操作。&lt;br /&gt;
+在你认为合适的地方建立内容如下所述，文件名不那么重要的文件^_^：
+    interface=wlan0
+    driver=nl80211
+    ssid=MyAP
+    channel=1
+这个文件使端口wlan0工作在1信道下，建立一个ssid为MyAP的热点。默认不启用加密。若需设置加密，或需要更多信息，请参考&lt;a href="http://linuxwireless.org/en/users/Documentation/hostapd"&gt;这里&lt;/a&gt;&lt;br /&gt;
+使用命令&lt;code&gt;sudo hostapd /path/to/config/file&lt;/code&gt;启动hostapd，注意需要提供绝对路径。&lt;/p&gt;
+&lt;h1&gt;建立设置网络桥接&lt;/h1&gt;
+&lt;p&gt;网络桥接的配置需要使用brctl命令，在Gentoo下通过`sudo emerge -av bridge-utils安装。
+下面这段命令用于建立一个名叫br0的网桥。并把 wlan0 和 eth0 加入网桥&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;ifconfig eth0 up
+ifconfig wlan0 up
+brctl addbr br0
+brctl addif br0 eth0
+brctl addif br0 wlan0
+ifconfig br0 up
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;如果没有返回错误，桥接就已经成功了。&lt;/p&gt;
+&lt;h1&gt;新的路由项&lt;/h1&gt;
+&lt;p&gt;需要注意的是，在完成桥接设置后，你需要重新设置路由表，使得default指向br0而不是eth0。要做到这一点，最方便的做法（如果你在一个使用dhcp的网络环境下）是使用&lt;code&gt;dhcpcd -k eth0 &amp;amp;&amp;amp; dhcpcd br0&lt;/code&gt;来重新设置路由。如果没有DHCP，那您需要手动删除eth0上绑定的IP地址，并在br0上进行设置，最后更改相应的路由表项。我假设如果您会手动配置网络，一定知道我在说什么^_*。
+如果您想更方便的设置，wicd中可以在preference中将wired interface改为br0，然后使用wicd进行配置。如果您这么做，在网桥消失之后（比如重启计算机之后）您需要将刚才的设置改回eth0。&lt;/p&gt;</summary><category term="Linux"></category><category term="Network"></category></entry><entry><title>使用基于TCP的DNS解析服务防止DNS污染</title><link href="http://srcflow.info/shi-yong-ji-yu-tcpde-dnsjie-xi-fu-wu-fang-zhi-dnswu-ran.html" rel="alternate"></link><updated>2012-12-25T00:00:00+08:00</updated><author><name>Ronald Liu</name></author><id>tag:srcflow.info,2012-12-25:shi-yong-ji-yu-tcpde-dnsjie-xi-fu-wu-fang-zhi-dnswu-ran.html</id><summary type="html">&lt;p&gt;本文通过使用开源项目tcpdns帮助读者使用纯净的DNS服务。本文所提供的方案试图解决如下问题：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;大多数ISP网络中（避免使用代理，并高速的）访问被封锁的、有SSL而没被IP封锁的网站，其中比较著名的网站包括(Facebook, Google全系列服务, Youtube)。  &lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;防止你的ISP通过DNS投毒插入广告  &lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;!--break--&gt;
+
+&lt;p&gt;如果您对原理知识不感兴趣，您可以直接跳转到&lt;a href="#usage"&gt;这里&lt;/a&gt;了解具体的使用方法。  &lt;/p&gt;
+&lt;h1&gt;DNS污染&lt;/h1&gt;
+&lt;p&gt;在之前的文章中已经讲过关于DNS污染的相关问题，这里大概复述一下。DNS污染的主要症状是解析出的IP地址明显不合法，用浏览器访问时显示连接超时或找不到服务器。DNS污染的主要手段是ISP或GFW发现非法DNS请求时，冒充正常的DNS服务器发送错误的解析结果。&lt;/p&gt;
+&lt;h1&gt;DNS污染的传统对策分析&lt;/h1&gt;
+&lt;p&gt;应对DNS污染的传统对策包括：使用VPN、代理服务器、SOCKS5a标准端口转发等通用翻墙方法，以及修改Hosts文件的方法。同样，在CERNET2中的同学们也会使用hosts文件访问IPv6网站。以上方法的内在原理在于，通过可靠的信道获取正确的DNS信息，防止DNS污染。&lt;br /&gt;
+传统对策的弱点在于：&lt;br /&gt;
+1. 使用通用翻墙方法浪费大量代理服务器的带宽，事实上受污染的只有DNS数据，而代理服务器、VPN等通用翻墙方式将所有信息全部加密或通过代理转发。使用此方法的代价是传输速率的下降，以及严重依赖代理服务器的状态，设置复杂且容易出错。&lt;br /&gt;
+2. 使用hosts文件方法事实上相当于自己构建了一个保留了“纯净”DNS信息的DNS服务器副本。这种方法灵活性非常差，而且使用不甚方便。如果要在不同网络状况下切换，每次都需要对hosts文件进行修改。  &lt;/p&gt;
+&lt;h1&gt;应对DNS污染的新思路&lt;/h1&gt;
+&lt;p&gt;通过分析发现，DNS污染之所以实现，是因为客户DNS请求使用UDP协议与服务器通信。UDP协议作为一个无连接协议，容易被中间人植入信息，并且难以被发现。GFW使用这个原理，冒充真正的DNS服务器发送错误的UDP包，从而使客户无法获得正确的IP地址。
+同时可以注意到的是，DNS协议同样可以基于TCP协议实现。而由于TCP 协议是有连接协议，植入信息需要动态的对数据流做分析。代价很大因此GFW并没做这么做。因此，如果使用基于TCP的DNS解析服务，就可以应对目前GFW的DNS污染。  &lt;/p&gt;
+&lt;h1&gt;解决方案和代码&lt;/h1&gt;
+&lt;h2&gt;解决方案&lt;/h2&gt;
+&lt;p&gt;由于大多数操作系统无法设置DNS为使用TCP连接。因此解决方案设计为，在本地设置一个简单的DNS代理，它接受从操作系统发出的DNS请求（基于UDP），然后向可信的DNS服务器发送内容相同，但基于TCP的DNS请求，获得结果后通过UDP返回给操作系统。在操作系统看来，上述过程完全是虚拟的。只需要将系统的DNS服务器设置为本机即可。&lt;br /&gt;
+&lt;a href="https://github.com/henices/Tcp-DNS-proxy"&gt;这个项目&lt;/a&gt; 用Python实现了上述方案。在此基础上，项目&lt;a href="https://github.com/Ronald-Liu/Tcp-DNS-proxy"&gt;Ronald/TCP-DNS-Proxy&lt;/a&gt; 为了方便更多人，尤其是Linux用户，的使用增加了对IPv6 DNS支持和自动修改resolv.conf的功能。&lt;br /&gt;
+&lt;a id="usage" name="usage"&gt;&lt;/a&gt;  &lt;/p&gt;
+&lt;h2&gt;使用方法&lt;/h2&gt;
+&lt;p&gt;下载处于ipv6分支下的tcpdns.py
+你同样可以在本站下载稳定版的&lt;a href="/files/tcpdns.py"&gt;tcpdns.py&lt;/a&gt;文件&lt;/p&gt;
+&lt;h3&gt;Linux用户&lt;/h3&gt;
+&lt;p&gt;使用&lt;code&gt;sudo python tcpdns.py&lt;/code&gt;启动。如果你使用DHCP，你可能需要手动在Network-Manager里或wicd里将DNS Server设置为127.0.0.1&lt;br /&gt;
+如果你使用带有OpenRC的系统（如Gentoo, Debian），下载位于ipv6分支下的tcp-dns-proxy（你同样可以在本站下载稳定版本&lt;a href="/files/tcp-dns-proxy"&gt;tcp-dns-proxy&lt;/a&gt;。编辑它，将APP_PATH设置为存放tcpdns.py的绝对地址。然后把tcp-dns-proxy 拷贝入/etc/init.d。最后用&lt;code&gt;sudo rc-update add tcp-dns-proxy default&lt;/code&gt;使其默认启动。使用命令&lt;code&gt;sudo /etc/init.d/tcp-dns-proxy start&lt;/code&gt;可以立即启动程序&lt;/p&gt;
+&lt;h3&gt;Windows用户&lt;/h3&gt;
+&lt;p&gt;安装Python 2.7运行时环境&lt;br /&gt;
+双击tcpdns.py&lt;br /&gt;
+设置系统DNS为127.0.0.1&lt;/p&gt;</summary><category term="GFW"></category><category term="DNS"></category><category term="TCP"></category></entry><entry><title>[How To]同步FTP文件 in Linux</title><link href="http://srcflow.info/how-totong-bu-ftpwen-jian-in-linux.html" rel="alternate"></link><updated>2012-12-24T00:00:00+08:00</updated><author><name>Ronald Liu</name></author><id>tag:srcflow.info,2012-12-24:how-totong-bu-ftpwen-jian-in-linux.html</id><summary type="html">&lt;p&gt;新博客是Jekyll生成的静态网页，每次发布文章都需要重新生成网页并提交到服务器上。目前使用的服务器提供FTP。因此如果能通过某种方式将生成完的静态数据通过简单的方式同步到服务器上，一定会很爽。&lt;/p&gt;
+&lt;!--break--&gt;
+
+&lt;p&gt;Google了一下看到了&lt;a href="http://www.kreci.net/linux/how-to-synchronize-your-files-by-ftp/"&gt;这篇&lt;/a&gt;文章。这里转过来，方便不太懂英文的同学，以及被GFW折磨的同学。&lt;/p&gt;
+&lt;h2&gt;1. 安装lftp&lt;/h2&gt;
+&lt;p&gt;根据你的发行版不同，你需要使用不同的命令。比如我用的是Gentoo那么应该是这样的。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="c"&gt;# emerge -av lftp&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;其他发行版可以到网上找教程安装  &lt;/p&gt;
+&lt;h2&gt;2. 建立一个同步配置文件&lt;/h2&gt;
+&lt;p&gt;对于我来说，我需要将_site目录下的文件同步到服务器的根目录。而服务器地址是ronald-liu.ftp.narod.ru。在_site目录之上的目录下创建一个upload.lftp文件，内容大概是&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;open ftp://ronald-liu.ftp.narod.ru
+user yourUsername yourPassword
+mirror --delete -R --only-newer ./_site/ /
+&lt;span class="nb"&gt;exit&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;各位根据自己的情况强势替换即可。  &lt;/p&gt;
+&lt;h2&gt;3.一句话同步&lt;/h2&gt;
+&lt;p&gt;如下命令可以帮助你一句话同步目录。你可以把它写到一个脚本文件里。或者像我一样写到Rakefile里，方便生成之后立即进行同步&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;lftp -f -v upload.lftp
+&lt;/pre&gt;&lt;/div&gt;</summary><category term="Linux"></category></entry><entry><title>新的一夜 新的一页</title><link href="http://srcflow.info/xin-de-ye-xin-de-ye.html" rel="alternate"></link><updated>2012-12-23T00:00:00+08:00</updated><author><name>Ronald Liu</name></author><id>tag:srcflow.info,2012-12-23:xin-de-ye-xin-de-ye.html</id><summary type="html">&lt;hr /&gt;
+&lt;p&gt;真心不想再为博客的事情难过了。累了，想办法落脚才是王道。  &lt;/p&gt;
+&lt;!--break--&gt;
+
+&lt;p&gt;jekyll是个好东西。但是真心的，如果这东西是用python写的，我会更加高兴的。 
+主题还是要定制一下比较好。网站的副标题，我想就当作心情了，想到的时候就更新一下。&lt;br /&gt;
+rake貌似很强大的样子，回头研究。&lt;br /&gt;
+感谢&lt;a href="xyang.chongqinglug.org"&gt;xyang.cq&lt;/a&gt;提供主机，感谢jekyll和jekyll-bootstrap&lt;br /&gt;
+最近联合xyang.cn，准备写一个关于GFW的系列文章，和大家分享。请使劲提建议，用力拍砖。  &lt;/p&gt;</summary><category term="杂谈"></category></entry><entry><title>[How to]通过命令获取VirtualBox虚拟机Guest的IP地址</title><link href="http://srcflow.info/how-totong-guo-ming-ling-huo-qu-virtualboxxu-ni-ji-guestde-ipdi-zhi.html" rel="alternate"></link><updated>2012-12-13T00:00:00+08:00</updated><author><name>Ronald Liu</name></author><id>tag:srcflow.info,2012-12-13:how-totong-guo-ming-ling-huo-qu-virtualboxxu-ni-ji-guestde-ipdi-zhi.html</id><summary type="html">&lt;p&gt;最近在做驱动开发，需要在虚拟机和主机之间同步代码和文件。Guest通过Bridge方式上网。我的想法是写个脚本用rsync同步，可是由于Bridge进局域网之后IP会随DHCP配置改变而改变，因此需要通过命令获取Guest对应的IP地址。（我知道可以用Shared Folder，但是我总是配置不好那个Guest Addition。而且那个东西效率差的一X）  &lt;/p&gt;
+&lt;p&gt;查了文档，发现这个问题不是很复杂。用VBoxManage的命令可以方便的获取IP地址。下面命令会返回一个差不多我们想要的  &lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;VBoxManage guestproperty get &lt;span class="s2"&gt;&amp;quot;abc&amp;quot;&lt;/span&gt; /VirtualBox/GuestInfo/Net/0/V4/IP
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;其中abc是你虚拟机的名称，你可以使用如下命令列出所有注册过的虚拟机&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;VBoxManage list vms
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;后面那串乱码是所谓的UUID，在前一个代码里的"abc"也可以用它对应的UUID代替，那样你的代码会显得，俄，更加犀利以及难懂一些~_^&lt;/p&gt;
+&lt;p&gt;也许某些同学会注意到，命令除了返回IP地址之外，还有一个Value:。这些字符如果传给ssh,rsync等程序必然会引起错误。解决方法是用tr命令在输入之前把多余的字符去掉，注意，返回值末尾有一个\n，同样需要去掉。以下代码用于自动在主机的a文件夹和Guest的a文件夹之间同步。  &lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nv"&gt;guestIP&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="sb"&gt;`&lt;/span&gt;VBoxManage guestproperty get &lt;span class="s2"&gt;&amp;quot;abc&amp;quot;&lt;/span&gt; /VirtualBox/GuestInfo/Net/0/V4/IP | tr -d &lt;span class="s2"&gt;&amp;quot;[\&amp;quot;Value: \&amp;quot;\n]&amp;quot;&lt;/span&gt;&lt;span class="sb"&gt;`&lt;/span&gt;
+rsync -avz -e ssh ronald@&lt;span class="nv"&gt;$guestIP&lt;/span&gt;:/home/ronald/a a
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;ronald是俺在Guest中的用户名..&lt;/p&gt;</summary></entry><entry><title>FixJWC2.0</title><link href="http://srcflow.info/fixjwc20.html" rel="alternate"></link><updated>2012-07-15T00:00:00+08:00</updated><author><name>Ronald Liu</name></author><id>tag:srcflow.info,2012-07-15:fixjwc20.html</id><summary type="html">&lt;p&gt;重庆大学教务处网站作为一个无节操的IE Only网站，居然堂而皇之的运行了一个学期。学校居然想改的动静都没有。上个寒假，鄙人尝试开发Fix JWC项目以使教务系统可以正常的在Chrome/Chromium和Firefox浏览器上显示和使用。fixJWC第一版完成了对于老教务系统的修复。&lt;/p&gt;
+&lt;!--break--&gt;
+
+&lt;p&gt;不幸的是，学校切换到了新的教务系统。新教务系统不能正常使用主要有两方面原因。1、在Chrome/Chromium上无法登陆，2、在非IE浏览器中导航栏不能正常使用。 &lt;br /&gt;
+对于登陆问题。由于受到Same-Origin原则的限制，无法使用其他域（甚至是本地的）网页替换并代理登陆。因此只能开发一个插件，对教务处首页进行代码插入，辅助用户登陆。 &lt;br /&gt;
+对于导航栏问题，鄙人使用了一部分教务处系统原来的代码，将其中与显示相关的ShowBar, ToLink, addLinkBlock, addLinkGroup几个函数重新实现，并使用新的菜单栏显示代码生成导航栏。直接调用原有的信息网页到一个单独的iframe里解决问题。   &lt;/p&gt;
+&lt;p&gt;下一步工作主要有：&lt;br /&gt;
+&lt;em&gt; 添加Firefox支持，因为完全使用JS实现，因此工作量应该不大。&lt;br /&gt;
+&lt;/em&gt; 集成修复老教务系统的那些代码
+&lt;em&gt; 找个更好的名字，这个名字好像有点俗
+&lt;/em&gt; 求大家帮忙画个图标
+* 把操作界面弄好看一些
+有兴趣一起开发的同学欢迎欢迎联系我。看过我代码的求轻吐槽。。。。 &lt;br /&gt;
+Ronald于2012-7-14午夜&lt;/p&gt;</summary><category term="JavaScript Chrome"></category></entry><entry><title>一个用来把gfwList里网址转换成IP的脚本</title><link href="http://srcflow.info/ge-yong-lai-ba-gfwlistli-wang-zhi-zhuan-huan-cheng-ipde-jiao-ben.html" rel="alternate"></link><updated>2011-08-19T00:00:00+08:00</updated><author><name>Ronald Liu</name></author><id>tag:srcflow.info,2011-08-19:ge-yong-lai-ba-gfwlistli-wang-zhi-zhuan-huan-cheng-ipde-jiao-ben.html</id><summary type="html">&lt;p&gt;ZZJ于8月17日提出用gfwList的网址通过可信的DNS转换成IP，写入hosts文件进而实现翻墙的方法。鄙人通过Python脚本进行了实现。代码丑陋望大牛指教。&lt;/p&gt;
+&lt;!--break--&gt;
+
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="n"&gt;import&lt;/span&gt; &lt;span class="n"&gt;sys&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;DNS&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;base64&lt;/span&gt;
+
+&lt;span class="n"&gt;def&lt;/span&gt; &lt;span class="n"&gt;splitList&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;txt&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
+    &lt;span class="n"&gt;arr&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;txt&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;split&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;&lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="n"&gt;l&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[]&lt;/span&gt;
+    &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;line&lt;/span&gt; &lt;span class="k"&gt;in&lt;/span&gt; &lt;span class="n"&gt;arr&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
+        &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;not&lt;/span&gt; &lt;span class="n"&gt;len&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;line&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="err"&gt;#&lt;/span&gt;&lt;span class="n"&gt;empty&lt;/span&gt; &lt;span class="n"&gt;line&lt;/span&gt;
+            &lt;span class="k"&gt;continue&lt;/span&gt;
+        &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;line&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;!&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="err"&gt;#&lt;/span&gt;&lt;span class="n"&gt;Comment&lt;/span&gt; &lt;span class="n"&gt;line&lt;/span&gt;
+            &lt;span class="k"&gt;continue&lt;/span&gt;
+        &lt;span class="n"&gt;elif&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;line&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;@@&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="err"&gt;#&lt;/span&gt;&lt;span class="n"&gt;Forbidding&lt;/span&gt; &lt;span class="n"&gt;line&lt;/span&gt;
+            &lt;span class="k"&gt;continue&lt;/span&gt;
+        &lt;span class="n"&gt;elif&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;line&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;find&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;/&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;!=-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="n"&gt;or&lt;/span&gt; &lt;span class="n"&gt;line&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;find&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;*&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;!=-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="err"&gt;#&lt;/span&gt;&lt;span class="n"&gt;URL&lt;/span&gt; &lt;span class="n"&gt;is&lt;/span&gt; &lt;span class="n"&gt;ignored&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;only&lt;/span&gt; &lt;span class="n"&gt;domains&lt;/span&gt; &lt;span class="n"&gt;left&lt;/span&gt;
+            &lt;span class="k"&gt;continue&lt;/span&gt;
+
+        &lt;span class="err"&gt;#&lt;/span&gt;&lt;span class="n"&gt;In&lt;/span&gt; &lt;span class="n"&gt;this&lt;/span&gt; &lt;span class="k"&gt;case&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;domain&lt;/span&gt; &lt;span class="n"&gt;name&lt;/span&gt; &lt;span class="n"&gt;is&lt;/span&gt; &lt;span class="n"&gt;irrelevant&lt;/span&gt; &lt;span class="n"&gt;to&lt;/span&gt; &lt;span class="n"&gt;protocol&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;http&lt;/span&gt; &lt;span class="n"&gt;or&lt;/span&gt; &lt;span class="n"&gt;https&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="n"&gt;elif&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;line&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;||&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
+            &lt;span class="n"&gt;l&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;append&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;line&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
+        &lt;span class="n"&gt;elif&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;line&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;.&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
+            &lt;span class="n"&gt;l&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;append&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;line&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
+        &lt;span class="nl"&gt;else:&lt;/span&gt;
+            &lt;span class="n"&gt;l&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;append&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;line&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;l&lt;/span&gt;
+
+
+
+&lt;span class="cp"&gt;#Decode and decorate the input string&lt;/span&gt;
+&lt;span class="n"&gt;f&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;open&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;gfwlist.txt&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;r&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="n"&gt;txt&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;read&lt;/span&gt;&lt;span class="p"&gt;().&lt;/span&gt;&lt;span class="n"&gt;replace&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;&lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="n"&gt;txt&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;base64&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;decodestring&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;txt&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="n"&gt;domains&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;splitList&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;txt&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="cp"&gt;#Set default DNS server&lt;/span&gt;
+&lt;span class="n"&gt;DNSServer&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="err"&gt;&amp;#39;&lt;/span&gt;&lt;span class="mf"&gt;8.8.8.8&lt;/span&gt;&lt;span class="err"&gt;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+&lt;span class="n"&gt;DNS&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;defaults&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="err"&gt;&amp;#39;&lt;/span&gt;&lt;span class="n"&gt;server&lt;/span&gt;&lt;span class="err"&gt;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;DNSServer&lt;/span&gt;
+
+&lt;span class="n"&gt;DNS&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;DiscoverNameServers&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+
+&lt;span class="cp"&gt;#These two varible are used to track the percentage of parsing process.&lt;/span&gt;
+&lt;span class="n"&gt;l&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;
+&lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;len&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;domains&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;line&lt;/span&gt; &lt;span class="k"&gt;in&lt;/span&gt; &lt;span class="n"&gt;domains&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
+    &lt;span class="n"&gt;request&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;DNS&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Request&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+    &lt;span class="nl"&gt;try:&lt;/span&gt;
+        &lt;span class="n"&gt;result&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;request&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;req&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;name&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;line&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;qtype&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;A&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;except&lt;/span&gt; &lt;span class="n"&gt;DNS&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Base&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;DNSError&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
+        &lt;span class="n"&gt;msg&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;line&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;&lt;/span&gt;&lt;span class="se"&gt;\t&lt;/span&gt;&lt;span class="s"&gt;Time Out&lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;&lt;/span&gt;
+    &lt;span class="nl"&gt;else:&lt;/span&gt;
+        &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;not&lt;/span&gt; &lt;span class="n"&gt;len&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;result&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;answers&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
+            &lt;span class="n"&gt;msg&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;line&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;&lt;/span&gt;&lt;span class="se"&gt;\t&lt;/span&gt;&lt;span class="s"&gt;No record&lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;&lt;/span&gt;
+        &lt;span class="nl"&gt;else:&lt;/span&gt;
+            &lt;span class="n"&gt;msg&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;line&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;&lt;/span&gt;&lt;span class="se"&gt;\t&lt;/span&gt;&lt;span class="s"&gt;Bingo&lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;&lt;/span&gt;
+            &lt;span class="n"&gt;print&lt;/span&gt; &lt;span class="n"&gt;line&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="s"&gt;&amp;quot; &amp;quot;&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;result&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;answers&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;][&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;data&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+    &lt;span class="n"&gt;print&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;sys&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;stderr&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;line&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;msg&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;l&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="mf"&gt;1.0&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;%&amp;quot;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;代码文件：&lt;a href="http://lzsblog.appspot.com/media/agdsenNibG9ncg0LEgVNZWRpYRjy-BEM/makeIP.py"&gt;makeIP.py&lt;/a&gt;&lt;br /&gt;
+文中使用了模块pyDNS,这一非标准模块需要到http://pydns.sourceforge.net/下载。&lt;br /&gt;
+解压后安装，&lt;code&gt;python setup.py install&lt;/code&gt; 
+然后运行程序，只需要将标准输出重定向到指定文件即可。&lt;code&gt;python makeIP.py &amp;gt; hosts&lt;/code&gt;&lt;br /&gt;
+接一句Fvck GFW  &lt;/p&gt;
+&lt;p&gt;PS:21:51更新，增加了过滤CNAME记录的功能，解决有跳转网站的解析问题，请下载最新的代码文件   &lt;/p&gt;
+&lt;p&gt;2012-4-4:有些同学在问gfwList是用什么加密的，其实gfwList只是用Base64编码进行了压缩，只需要用相应的软件即可解码，详情请见维基百科。这个脚本里用的是Python中自带的base64模块。&lt;/p&gt;</summary><category term="Python"></category><category term="gfwList"></category></entry><entry><title>stdcall和cdecl详解</title><link href="http://srcflow.info/stdcallhe-cdeclxiang-jie.html" rel="alternate"></link><updated>2011-04-30T00:00:00+08:00</updated><author><name>Ronald Liu</name></author><id>tag:srcflow.info,2011-04-30:stdcallhe-cdeclxiang-jie.html</id><summary type="html">&lt;p&gt;前些天搞dr.com的破解时有很多收获，一直想总结一下，以后也许有用，今天开个头，以后有时间再慢慢整理。  &lt;/p&gt;
+&lt;p&gt;写过dll的同学都知道stdcall 函数和一般的C函数是不一样的。最直观的不同就是在声明时stdcall函数要加上宏WINAPI。研究过导出表的同学可能会对这个问题有更深入的理解，因为当你输出一个C函数时，通常会加上特定的名字修饰。比如_foo@4（这个修饰方式和编译器实现相关）。你必须强制使用正确的函数名以防止LoadLibrary函数无法访问你的C函数。&lt;br /&gt;
+那么究竟什么是stdcall，为什么有stdcall和cdecl的区别，为什么cdecl（也就是一般的C函数）要加上如此奇怪的名字装饰呢。本文将从编译和执行的角度解释以上问题。阅读本文你需要一定的汇编基础。不太明白的同学请参看有关资料。&lt;br /&gt;
+一下叙述默认使用IA32结构。汇编代码会使用AT&amp;amp;T风格描述。如果你熟悉Intel风格，其实你要做的只是去掉每个指令的修饰后缀（如movl 中的l），它代表操作数的大小，l表示long，也就是4Byte。另外你需要忽略寄存器前的%和立即数前的$。 &lt;/p&gt;
+&lt;h1&gt;过程（函数）调用的一般步骤&lt;/h1&gt;
+&lt;p&gt;如果你不是使用不靠谱的国内汇编教材，你都会在学习汇编语言或计算机组成原理时了解过程调用的一般步骤。如果你已经熟悉过程调用的步骤，你可以直接跳到下一节。&lt;br /&gt;
+就像没有灯光的时候，你女伴的长相不是需要关注的第一问题一样。在较底层的空间里徘徊时，我们通常不需要区别函数和过程。因为函数只不过是有返回值的过程，而在机器层面，返回不过是把需要返回的值赋给指定的寄存器而已。&lt;br /&gt;
+典型的过程调用有以下几个步骤。&lt;br /&gt;
+&lt;em&gt; 将参数放到指定的区域，对于我们今天讨论的问题，这一步骤相当于以指定方式将参数压栈。而对于fastcall，参数是通过寄存器传递的。这也解释了它名字的来历。&lt;br /&gt;
+&lt;/em&gt; 将记录当前程序运行位置的寄存器值（IA32中为EIP）压栈。跳转到被调用过程所在的内存区域。IA32提供call指令完成上述过程。虽说call看起来只有一个指令，可是它处理的问题有很多。首先，它会将%EIP压栈，这是用来返回的，因为当被调过程完成时需要知道如何回到主调过程。然后他会执行一个类似于jmp的指令跳转到指定程序的位置。&lt;br /&gt;
+现在出现的一个问题是，当被调用过程开始执行时，栈顶指针和栈基址貌似与正常不符，一般情况下，一个过程应该能确定启动时自己的栈基址和栈顶指针相同。而对于被调用过程，这一假设通常由于局部变量的使用（他们位于栈中）而不成立。因此，一个过程开始时，会把栈基址压栈，然后将栈基址设为当前的栈顶指针。这就是为什么每个过程前面有类似pushl %ebp和mov %esp, %ebp&lt;br /&gt;
+&lt;em&gt; 在返回之前，你需要处理一些善后的事宜，包括恢复系统栈的栈基址和栈顶指针。你可以使用leave指令来完成恢复栈基址的工作。
+&lt;/em&gt; 当过程完成时，从栈里弹出主调用过程停止处的地址。并跳转过去，使得主调用过程继续进行。IA32提供ret完成上述过程。有时你可以使用retn n来执行上述步骤，后面跟的n是在返回之后esp将会增加的值。  &lt;/p&gt;
+&lt;h1&gt;关键问题：谁来善后栈顶指针&lt;/h1&gt;
+&lt;p&gt;刚才说过leave指针可以用来恢复栈基址。它的工作方式是先将栈顶指针设为栈基址，这里如前面所说，保存着主调进程的栈基址。然后将这个栈基址弹出，这时栈顶指针会指向返回地址，而栈基址会恢复到主调进程调用之前的位置。&lt;br /&gt;
+好吧，如果你晕了，那你可能需要找一个汇编的书研究一下，而且这与我们所讨论的问题没什么关系。&lt;br /&gt;
+那么，如何恢复栈顶指针呢？&lt;br /&gt;
+栈顶指针之所以会改变，是由于在调用被调过程之前主调过程会通过压栈来传递参数（在被调过程中对于栈的改变，哪怕是调用另外一个过程，都会由于leave的调用而恢复）。那么如何将这些参数清空就是我们需要考虑的问题了。这也正是stdcall和cdecl的区别。&lt;br /&gt;
+一个典型的stdcall过程调用汇编代码如下所示：&lt;br /&gt;
+主调用过程 :  &lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="n"&gt;pushl&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;arg1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="n"&gt;Step&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
+&lt;span class="n"&gt;pushl&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;arg2&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; 
+
+&lt;span class="n"&gt;call&lt;/span&gt; &lt;span class="n"&gt;foo&lt;/span&gt; &lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="n"&gt;Step&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;被调用过程:  &lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="n"&gt;pushl&lt;/span&gt; &lt;span class="o"&gt;%&lt;/span&gt;&lt;span class="n"&gt;ebp&lt;/span&gt;
+&lt;span class="n"&gt;movl&lt;/span&gt; &lt;span class="o"&gt;%&lt;/span&gt;&lt;span class="n"&gt;esp&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;%&lt;/span&gt;&lt;span class="n"&gt;ebp&lt;/span&gt;
+
+&lt;span class="err"&gt;…&lt;/span&gt; &lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="n"&gt;Here&lt;/span&gt;&lt;span class="err"&gt;&amp;#39;&lt;/span&gt;&lt;span class="n"&gt;s&lt;/span&gt; &lt;span class="n"&gt;the&lt;/span&gt; &lt;span class="n"&gt;body&lt;/span&gt; &lt;span class="n"&gt;of&lt;/span&gt; &lt;span class="n"&gt;procedure&lt;/span&gt;
+
+&lt;span class="n"&gt;leave&lt;/span&gt;  &lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="n"&gt;Step&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;
+&lt;span class="n"&gt;retn&lt;/span&gt; &lt;span class="mi"&gt;8&lt;/span&gt; &lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="n"&gt;Step&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt; &lt;span class="n"&gt;and&lt;/span&gt; &lt;span class="mf"&gt;4.&lt;/span&gt; &lt;span class="n"&gt;Here&lt;/span&gt; &lt;span class="mi"&gt;8&lt;/span&gt; &lt;span class="n"&gt;is&lt;/span&gt; &lt;span class="n"&gt;the&lt;/span&gt; &lt;span class="n"&gt;size&lt;/span&gt; &lt;span class="n"&gt;of&lt;/span&gt; &lt;span class="n"&gt;arguments&lt;/span&gt; &lt;span class="n"&gt;in&lt;/span&gt; &lt;span class="n"&gt;Byte&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;刚才说过retn会才执行完成之后（也就是执行主调过程中call之后那个指令之前），对%esp进行减运算。减数就是它的参数。 
+嗯，大家应该明白了， stdcall中被调用过程将会自己处理%esp的善后问题。那么，这就很容易理解为什么大家都说stdcall不能传递可变长度的参数了。因为只有主调过程知道到底push了多少参数到栈里，所以被调函数无法进行清理操作。 
+那cdecl是什么各位应该明白了。是的，是在主调过程中恢复%esp。我们来看一下。  &lt;/p&gt;
+&lt;p&gt;主调用过程：  &lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="n"&gt;pushl&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;arg2&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="n"&gt;Step&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
+&lt;span class="n"&gt;pushl&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;arg1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; 
+
+&lt;span class="n"&gt;call&lt;/span&gt; &lt;span class="n"&gt;bar&lt;/span&gt; &lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="n"&gt;Step&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;
+&lt;span class="n"&gt;addl&lt;/span&gt; &lt;span class="o"&gt;%&lt;/span&gt;&lt;span class="n"&gt;esp&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;8&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;被调用过程:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="n"&gt;pushl&lt;/span&gt; &lt;span class="o"&gt;%&lt;/span&gt;&lt;span class="n"&gt;ebp&lt;/span&gt;
+&lt;span class="n"&gt;movl&lt;/span&gt; &lt;span class="o"&gt;%&lt;/span&gt;&lt;span class="n"&gt;esp&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;%&lt;/span&gt;&lt;span class="n"&gt;ebp&lt;/span&gt;
+
+&lt;span class="err"&gt;…&lt;/span&gt; &lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="n"&gt;Here&lt;/span&gt;&lt;span class="err"&gt;&amp;#39;&lt;/span&gt;&lt;span class="n"&gt;s&lt;/span&gt; &lt;span class="n"&gt;the&lt;/span&gt; &lt;span class="n"&gt;body&lt;/span&gt; &lt;span class="n"&gt;of&lt;/span&gt; &lt;span class="n"&gt;procedure&lt;/span&gt;
+
+&lt;span class="n"&gt;leave&lt;/span&gt;  &lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="n"&gt;Step&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;
+&lt;span class="n"&gt;ret&lt;/span&gt;    &lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="n"&gt;Step&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;看出来了，主调过程自己处理了参数所占的栈空间。细心的同学可能会发现参数是以倒序压入的。很多人说为什么要后面的参数的先push。这个问题我们可以这样看。&lt;br /&gt;
+学过C语言的知道，函数一般用第一个参数指明究竟有多少参数被传递。比如main中的argc，printf中的format字符串等。因此第一个参数的地址必须容易确定。当参数全部push完成后，离被调函数的栈基址最近的应该是最后一个被push的参数。那么如果使用倒序的push顺序。第一个参数的位置很简单的可以确定为%ebp-4（有一个%eip也被压栈了，记得么）。这是的被调函数更容易编写。  &lt;/p&gt;
+&lt;h1&gt;关于修饰符&lt;/h1&gt;
+&lt;p&gt;最开始我们讲到，用C没有加stdcall修饰时导出的函数名会被修饰。如void foo(int arg1, int arg2)会被修饰为_foo@8，现在我们知道了。因为 stdcall有一个固定的参数列表，如果参数数量不一样会造成参数的错传（cdecl因为是倒序输入，即使参数数量过多，只要顺序正确就不会有问题），所以当C函数 被导出成stdcall时会明确的加上指明参数大小的修饰符。因此@8就是说foo函数的参数共占了 8个字节。&lt;/p&gt;</summary><category term="C/C++"></category></entry><entry><title>FvckDrcom项目总结和发布</title><link href="http://srcflow.info/fvckdrcomxiang-mu-zong-jie-he-fa-bu.html" rel="alternate"></link><updated>2011-03-28T00:00:00+08:00</updated><author><name>Ronald Liu</name></author><id>tag:srcflow.info,2011-03-28:fvckdrcomxiang-mu-zong-jie-he-fa-bu.html</id><summary type="html">&lt;p&gt;上个周我们学校的网络进行了升级。同学们发现网速快了，但是不能共享上网了。于是本人打算搞一下破解。以前没什么经验，前前后后干了3天。虽然有些坎坷，但还是收获颇丰。  &lt;/p&gt;
+&lt;!--break--&gt;
+
+&lt;p&gt;这个项目的名字有点不和谐，大家忍忍啊。&lt;br /&gt;
+原来dr.com客户仅使用mac地址认证的方式来确认是否是真正的用户登录。因此可以通过更改路由器的Mac地址来欺骗并实现共享上网。这次升级之后，添加了IP地址确认。也就是对比进行认证的Ip地址（将会是路由器的外网地址）和本机的的内网地址是否一致来判断是否有路由器。这样一般的路由器共享方式就失效了。&lt;br /&gt;
+前几天跟ZZJ研究这个问题提出了一种凑合的方法，即使用一个虚拟的Loopback网卡来模拟一个正确的外部IP，从而欺骗Dr.com客户端。不过我是想更绝一些，连Mac地址的问题（总是要来回改）一起解决了。因此就想到进行这次项目&lt;br /&gt;
+破解的基本思路是使用劫持Dll的方式阻断dr.com客户端获取正常mac地址和ip地址的途径。提供假的（固定的）IP和Mac地址，破坏上述的认证过程，实现共享上网。&lt;br /&gt;
+以前被做过Dll劫持啊，走了很多弯路。不过最后还是做成功了，嘿嘿。&lt;br /&gt;
+源代码有兴趣的同学可以上我这里索取啊，lzsdc@yahoo.com.cn。&lt;br /&gt;
+程序还有很多不完善的地方，比如由于我懒得编GUI，配置文件的生成还要使用的命令行界面。希望有能力的同学帮下忙，大家一起为获取自由的互联网奋斗（不要想太多）。  &lt;/p&gt;
+&lt;p&gt;编译版和源代码在Google Code上托管&lt;a href="http://code.google.com/p/fvck-dr-com/"&gt;fvck-dr-com&lt;/a&gt;&lt;br /&gt;
+- PS : 感谢ZZJ的64-bit编译版&lt;br /&gt;
+- PPS: 用路由器被发现的同学请自行配置路由器的iptables对TTL进行规则化&lt;br /&gt;
+- PSP: 目前已经不在虎溪很多年了。如果需要我做什么，请发送drcom.log和pcap文件用来分析。&lt;/p&gt;</summary><category term="drcom"></category><category term="Windows"></category><category term="network"></category></entry><entry><title>[How to]如何获取Google Chrome离线安装包</title><link href="http://srcflow.info/how-toru-he-huo-qu-google-chromechi-xian-an-zhuang-bao.html" rel="alternate"></link><updated>2010-12-08T00:00:00+08:00</updated><author><name>Ronald Liu</name></author><id>tag:srcflow.info,2010-12-08:how-toru-he-huo-qu-google-chromechi-xian-an-zhuang-bao.html</id><summary type="html">&lt;p&gt;作为一个互联网公司，Google的几乎所有产品都使用在线方式安装，而不是直接提供离线安装包。也许是为了方便管理和更新，不过在某些情况下确实需要下载离线安装包。比如我需要一个Chrome到学校的只提供IE的学校图书馆电脑上去安装，而学校图书馆的下载速度很慢（墙内还有被Reset的情况...），那么最简单的方式就是下载一个离线安装包，用移动存储介质拷过去安装。  &lt;/p&gt;
+&lt;p&gt;废话这么多，其实方法很简单，就是在一般的Chrome下载页加上请求信息standalone=1。如此下载下来的就不再是一个Internet installer 而是一个叫ChromeStandaloneSetup.exe。这个文件即是是官方的Chrome最新版本的离线安装包。&lt;br /&gt;
+在简单一点说，就是在地址栏中输入&lt;br /&gt;
+&lt;code&gt;http://www.google.com/chrome/eula.html?standalone=1&lt;/code&gt;&lt;br /&gt;
+下载的是英文版，同理中文版的下载地址为 &lt;br /&gt;
+&lt;code&gt;http://www.google.com/chrome/eula.html?hl=zh-CN&amp;amp;standalone=1&lt;/code&gt;&lt;br /&gt;
+无压力...不过文件还是有点大，大约24MB左右&lt;/p&gt;</summary></entry><entry><title>[How To]如何编译OpenCV程序 in Linux</title><link href="http://srcflow.info/how-toru-he-bian-yi-opencvcheng-xu-in-linux.html" rel="alternate"></link><updated>2010-08-17T00:00:00+08:00</updated><author><name>Ronald Liu</name></author><id>tag:srcflow.info,2010-08-17:how-toru-he-bian-yi-opencvcheng-xu-in-linux.html</id><summary type="html">&lt;p&gt;当你完成了OpenCV的安装开始研究她时，要解决的第一个问题可能就是如何编译自己的程序。对于不是很喜欢用IDE的我，找到如何编译她确实让我废了一番劲。写这篇文章想帮大家少走点弯路。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="cp"&gt;#include &amp;lt;opencv/highgui.h&amp;gt;&lt;/span&gt;
+&lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="nf"&gt;main&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;argc&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;char&lt;/span&gt;&lt;span class="o"&gt;**&lt;/span&gt; &lt;span class="n"&gt;argv&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;  
+    &lt;span class="n"&gt;IplImage&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;img&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;cvLoadImage&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;argv&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt; 
+
+    &lt;span class="n"&gt;cvNamedWindow&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;test1&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;CV_WINDOW_AUTOSIZE&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+    &lt;span class="n"&gt;cvShowImage&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;test1&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;img&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+    &lt;span class="n"&gt;cvWaitKey&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+    &lt;span class="n"&gt;cvReleaseImage&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;img&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+    &lt;span class="n"&gt;cvDestroyWindow&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;test1&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;一般来讲，这个从教程上搬下来的程序是可以编译通过的，但是如果不加配置的连接将会提示“找不到引用”的错误   &lt;/p&gt;
+&lt;p&gt;问题出在正常安装OpenCV时，有关的五个重要动态库libcv.so libcxcore.so libml.so libhighgui.so libaux.so都位于/usr/local/lib中，而这个文件夹并不处于ld-linux.so的搜索列表内。所以链接器就不能找到所需要的动态库。这里需要注意的是linux中so文件既包括代码，也包括函数描述，因此不必像win中一样引用生成dll的.o文件。具体的机制我也在研究，很快再写一篇文章来讲。&lt;br /&gt;
+回到正题。&lt;br /&gt;
+关于如何将动态库加入到ld-linux.so搜索列表里的问题，网上有很多优秀的文章。不过我的性格是解决一切影响效率的因素。因此这里介绍种理论上讲更高效的做法。既添加相应的链接选项来进行编译。&lt;br /&gt;
+上述程序(testHighGui.c)用如下命令行编译可以成功生成可执行文件  &lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;gcc -L &lt;span class="s1"&gt;&amp;#39;/usr/local/lib&amp;#39;&lt;/span&gt; -lcv -lhighgui  -Wl,-rpath,/usr/local/lib testHighGui.c
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;句意很明确了就是指定编译器和链接器到指定的位置搜索libcv.so libhighgui.so。如果需要，你也许要加上-lml -laux -lcxcore 来进行链接。  &lt;/p&gt;
+&lt;p&gt;对于/usr/local/lib出现了两次。我的解释是第一次是用作编译参数，第二次用作链接参数。也就是说如果第一个没有添加，程序在运行时会报错（缺少运行时动态库，系统没有搜索/usr/local/lib）。第二个用于指示链接器到指定位置搜索动态库进行链接，如果没有添加将会出现引用错误。  &lt;/p&gt;
+&lt;p&gt;好啦。有什么问题欢迎和我联系啊。lzsdc@yahoo.com.cn  &lt;/p&gt;
+&lt;p&gt;Tip:我做实验时出现了这样一个错误&lt;br /&gt;
+    terminate called after throwing an instance of 'std::logic_error'
+    what():  basic_string::_S_construct NULL not valid
+找了半天没发现问题，后来我发现。。。我没有输入图片路径，呃尴尬。同学们不要犯同样的错误啊。&lt;/p&gt;</summary><category term="OpenCV"></category><category term="C/C++"></category></entry></feed>
