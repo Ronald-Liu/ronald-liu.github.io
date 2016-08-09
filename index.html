@@ -82,13 +82,13 @@
 				
 				
 				<li>
-					<a href="https://linkedin.com/in/http://www.linkedin.com/in/cnronald"><i class="fa fa-fw fa-linkedin"></i> LinkedIn</a>
+					<a href="https://linkedin.com/in/cnronald"><i class="fa fa-fw fa-linkedin"></i> LinkedIn</a>
 				</li>
 				
 				
 				
 				<li>
-					<a href="https://www.flickr.com/photos/https://www.flickr.com/photos/thinkingcentre/"><i class="fa fa-fw fa-flickr"></i> Flickr</a>
+					<a href="https://www.flickr.com/photos/thinkingcentre"><i class="fa fa-fw fa-flickr"></i> Flickr</a>
 				</li>
 				
 			</ul><!-- /.dl-submenu -->
@@ -157,7 +157,7 @@ Reading time ~12 minutes
 博主使用的主题是<a href="https://mademistakes.com/work/hpstr-jekyll-theme/">HPSTR</a>，可以直接从它的Github主页上克隆，或下载源代码包到本地目录。通过修改_config.yml文件来定制自己的博客 <br />
 博客文章全部放置在 <code class="highlighter-rouge">_posts</code>目录中，可以看看主题自带的一些示例文章来学习具体的语法。<br />
 虽然GitHub提供了Jekyll的环境，博主作为控制欲爆棚的汉子还是希望编译的过程运行在本地，也方便前期网站参数的调试。而为了方便将编译完之后的文件推送到GitHub Pages上，可以将自己的Github Pages(路径是xxx.github.io的那个)clone到源文件目录的<code class="highlighter-rouge">_site</code>目录中，这样每次进行Jekyll编译之后，只需要在<code class="highlighter-rouge">_site</code>目录中执行<code class="highlighter-rouge">git add .</code> 和 <code class="highlighter-rouge">git push</code>就可以完成Github Pages的更新<br />
-最后，为了更准确的估计中文文档的阅读时间，我们需要调整默认的阅读时间估算程序。方法是修改_includes/read-time.html和_includes/read-time-index.html，将其中的number_of_words替换为size即可。</p>
+最后，为了更准确的估计中文文档的阅读时间，我们需要调整默认的阅读时间估算程序。方法是修改<code class="highlighter-rouge">_includes/read-time.html</code> 和 <code class="highlighter-rouge">_includes/read-time-index.html</code>，将其中的<code class="highlighter-rouge">number_of_words</code>替换为size即可。</p>
 
 <h1 id="emacs">配置Emacs</h1>
 <p>Hyde.el是一个Emacs上用于管理Jekyll博客的Mode。它包含了一个前端，一个管理版本的后端和一个可以对写作过程做提示的Markdown编辑模式。本章介绍在MacOS环境下配置Hyde.el的过程。
