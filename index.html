@@ -126,6 +126,86 @@
   <header>
     
     <div class="entry-meta">
+      <span class="entry-date date published updated"><time datetime="2016-08-09T00:00:00+08:00"><a href="/2016/222/migrate_to_jekyll.html">August 09, 2016</a></time></span><span class="author vcard"><span class="fn"><a href="/about/" title="About Ronald Liu">Ronald Liu</a></span></span>
+      
+      <span class="entry-reading-time">
+        <i class="fa fa-clock-o"></i>
+        
+Reading time ~1 minute
+      </span><!-- /.entry-reading-time -->
+      
+    </div><!-- /.entry-meta -->
+    
+      <h1 class="entry-title"><a href="/2016/222/migrate_to_jekyll.html" rel="bookmark" title="（重新）迁移到Jekyll" itemprop="url">（重新）迁移到Jekyll</a></h1>
+    
+  </header>
+  <div class="entry-content">
+    <h1 id="section">前传</h1>
+<p>这博客大概两三年没有更新了，突然感觉是时候重新拾起来了。之前出于对Python的执念强行把生成器从Jekyll换成了Pelican。回头发现真还是Jekyll的社区比较发达，最终又重新换回了Jekyll。本篇博文就来说说配置Jekyll写作环境的事情。</p>
+
+<h1 id="jekyll">配置Jekyll</h1>
+
+<h1 id="emacs">Emacs配置</h1>
+<p>Hyde.el是一个Emacs上用于管理Jekyll博客的Mode。它包含了一个前端，一个管理版本的后端和一个可以对写作过程做提示的Markdown编辑模式。本章介绍在MacOS环境下配置Hyde.el的过程。
+请首先确认已经安装好了Markdown Mode</p>
+
+<h2 id="section-1">安装</h2>
+<p>要配置Hyde.el，首先需要下载<a href="https://github.com/nibrahim/Hyde/archive/master.zip">Hyde.el</a>。解压到emacs.d的目录下。然后在自己的配置文件中添加下面的句子</p>
+
+<pre><code class="language-lisp">(add-to-list 'load-path (concat config-directory "/hyde/hyde*.el"))
+(require 'hyde)
+</code></pre>
+
+<p>博主只维护了一个博客，因此可以在Emacs配置文件中配置一个默认的博客源路径，免得每次启动都要指定这个路径。在配置文件中加入</p>
+
+<pre><code class="language-lisp">(setq hyde-home "path/to/your/blog/")
+(setq hyde/jekyll-command "bundle exec jekyll build")
+</code></pre>
+<p><em>千万注意这个路径最后需要加上’/’，否则会报错</em>
+<em>jekyll-command命令并不是必须的，然而在我的MacOS中直接运行jekyll会报依赖错误。由于本人对Ruby实在不了解，于是就用了这个笨办法。</em></p>
+
+<p>在当前的Hyde.el版本(a8cd6ed)中，存在无法读取默认博客源文件路径的问题，需要修改Hyde.el最后部分</p>
+
+<pre><code class="language-lisp">(jekyll-root (or home
+                          (hyde/ask-for-jekyll-root)))
+</code></pre>
+
+<p>为</p>
+
+<pre><code class="language-lisp">(jekyll-root (or hyde-home (or home
+                          (hyde/ask-for-jekyll-root))))
+</code></pre>
+
+<h2 id="section-2">使用</h2>
+<p>在需要写博客时，打开Emacs，执行M-x hyde，即可打开Hyde Mode。在设置了默认路径的情况下，不需要输入即可自动进入Major Mode界面。使用光标操作可以选择文件，回车打开文件。</p>
+
+<p>在Major Mode下的主要操作有：
+* n 新建新的草稿
+* c 提交当前文章，<em>输入文章标题时尽量用英文，以便生成英文的文章文件名，进入编辑模式后再修改title字段来修改文章标题</em>
+* P 推送所有未提交的commit（只是版本控制的提交，并非部署)
+* j 运行Jekyll 
+* d 部署该博客
+* g 刷新博客
+* p 将一个草稿提交为一个文章
+* q 退出Hyde
+* RET 打开指定文件进行编辑。</p>
+
+<p>在文章编辑Mode下的操作有：
+* C-c C-c 保存并提交文件
+* C-c C-v 预览文件，只能包含Markdown预览，无法对Liquid Tags做预览。
+Preview file (this is a markdown preview so extra liquid tags will not work).
+* C-c C-i 向文章中插入文件，该图片文件会自动拷贝到最终发布的网站中，十分方便</p>
+
+<h1 id="section-3">其他问题</h1>
+
+
+  </div><!-- /.entry-content -->
+</article><!-- /.hentry -->
+
+<article class="hentry">
+  <header>
+    
+    <div class="entry-meta">
       <span class="entry-date date published updated"><time datetime="2013-11-11T00:00:00+08:00"><a href="/2013/315/vs2013-boost.html">November 11, 2013</a></time></span><span class="author vcard"><span class="fn"><a href="/about/" title="About Ronald Liu">Ronald Liu</a></span></span>
       
       <span class="entry-reading-time">
@@ -429,59 +509,6 @@ ifconfig br0 up
 <h1 id="section-2">新的路由项</h1>
 <p>需要注意的是，在完成桥接设置后，你需要重新设置路由表，使得default指向br0而不是eth0。要做到这一点，最方便的做法（如果你在一个使用dhcp的网络环境下）是使用<code class="highlighter-rouge">dhcpcd -k eth0 &amp;&amp; dhcpcd br0</code>来重新设置路由。如果没有DHCP，那您需要手动删除eth0上绑定的IP地址，并在br0上进行设置，最后更改相应的路由表项。我假设如果您会手动配置网络，一定知道我在说什么^_*。<br />
 如果您想更方便的设置，wicd中可以在preference中将wired interface改为br0，然后使用wicd进行配置。如果您这么做，在网桥消失之后（比如重启计算机之后）您需要将刚才的设置改回eth0。</p>
-
-  </div><!-- /.entry-content -->
-</article><!-- /.hentry -->
-
-<article class="hentry">
-  <header>
-    
-    <div class="entry-meta">
-      <span class="entry-date date published updated"><time datetime="2012-12-24T00:00:00+08:00"><a href="/2012/359/how-toftp-in-linux.html">December 24, 2012</a></time></span><span class="author vcard"><span class="fn"><a href="/about/" title="About Ronald Liu">Ronald Liu</a></span></span>
-      
-      <span class="entry-reading-time">
-        <i class="fa fa-clock-o"></i>
-        
-Reading time ~1 minute
-      </span><!-- /.entry-reading-time -->
-      
-    </div><!-- /.entry-meta -->
-    
-      <h1 class="entry-title"><a href="/2012/359/how-toftp-in-linux.html" rel="bookmark" title="同步FTP文件 in Linux" itemprop="url">同步FTP文件 in Linux</a></h1>
-    
-  </header>
-  <div class="entry-content">
-    <p>新博客是Jekyll生成的静态网页，每次发布文章都需要重新生成网页并提交到服务器上。目前使用的服务器提供FTP。因此如果能通过某种方式将生成完的静态数据通过简单的方式同步到服务器上，一定会很爽。</p>
-
-<p>Google了一下看到了<a href="http://www.kreci.net/linux/how-to-synchronize-your-files-by-ftp/">这篇</a>文章。这里转过来，方便不太懂英文的同学，以及被GFW折磨的同学。</p>
-
-<h2 id="lftp">1. 安装lftp</h2>
-
-<p>根据你的发行版不同，你需要使用不同的命令。比如我用的是Gentoo那么应该是这样的。</p>
-
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="c"># emerge -av lftp</span>
-</code></pre>
-</div>
-
-<p>其他发行版可以到网上找教程安装</p>
-
-<h2 id="section">2. 建立一个同步配置文件</h2>
-
-<p>对于我来说，我需要将_site目录下的文件同步到服务器的根目录。而服务器地址是ronald-liu.ftp.narod.ru。在_site目录之上的目录下创建一个upload.lftp文件，内容大概是</p>
-
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code>open ftp://ronald-liu.ftp.narod.ru
-user yourUsername yourPassword
-mirror --delete -R --only-newer ./_site/ /
-<span class="nb">exit</span>
-</code></pre>
-</div>
-<p>各位根据自己的情况强势替换即可。</p>
-
-<h2 id="section-1">3.一句话同步</h2>
-<p>如下命令可以帮助你一句话同步目录。你可以把它写到一个脚本文件里。或者像我一样写到Rakefile里，方便生成之后立即进行同步
-<code class="highlighter-rouge">bash
-lftp -f -v upload.lftp
-</code></p>
 
   </div><!-- /.entry-content -->
 </article><!-- /.hentry -->

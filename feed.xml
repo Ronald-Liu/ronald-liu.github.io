@@ -1,4 +1,61 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom"><generator uri="http://jekyllrb.com" version="3.1.6">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2016-08-09T12:08:02+08:00</updated><id>/</id><title>Ronald的部落格</title><subtitle>一个人的博物馆</subtitle><entry><title>在Visual Studio 2013上编译boost 1.55</title><link href="/2013/315/vs2013-boost.html" rel="alternate" type="text/html" title="在Visual Studio 2013上编译boost 1.55" /><published>2013-11-11T00:00:00+08:00</published><updated>2013-11-11T00:00:00+08:00</updated><id>/2013/315/vs2013-boost</id><content type="html" xml:base="/2013/315/vs2013-boost.html">&lt;p&gt;在Visual Studio 2013(msvc12)上编译boost 1.55确实不是很容易。网上的教程大多过于陈旧，还有几个与VS不兼容的问题还没有修复。这篇文章总结了如何编译安装64位版本的boost 1.55 beta 1、修复一些小Bug，以及如何设置Visual Studio进行boost开发。其中某些不兼容问题在1.54版本中依然存在，同样可以用本文中的方法解决。&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom"><generator uri="http://jekyllrb.com" version="3.1.6">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2016-08-09T23:01:44+08:00</updated><id>/</id><title>Ronald的部落格</title><subtitle>一个人的博物馆</subtitle><entry><title>（重新）迁移到Jekyll</title><link href="/2016/222/migrate_to_jekyll.html" rel="alternate" type="text/html" title="（重新）迁移到Jekyll" /><published>2016-08-09T00:00:00+08:00</published><updated>2016-08-09T00:00:00+08:00</updated><id>/2016/222/migrate_to_jekyll</id><content type="html" xml:base="/2016/222/migrate_to_jekyll.html">&lt;h1 id=&quot;section&quot;&gt;前传&lt;/h1&gt;
+&lt;p&gt;这博客大概两三年没有更新了，突然感觉是时候重新拾起来了。之前出于对Python的执念强行把生成器从Jekyll换成了Pelican。回头发现真还是Jekyll的社区比较发达，最终又重新换回了Jekyll。本篇博文就来说说配置Jekyll写作环境的事情。&lt;/p&gt;
+
+&lt;h1 id=&quot;jekyll&quot;&gt;配置Jekyll&lt;/h1&gt;
+
+&lt;h1 id=&quot;emacs&quot;&gt;Emacs配置&lt;/h1&gt;
+&lt;p&gt;Hyde.el是一个Emacs上用于管理Jekyll博客的Mode。它包含了一个前端，一个管理版本的后端和一个可以对写作过程做提示的Markdown编辑模式。本章介绍在MacOS环境下配置Hyde.el的过程。
+请首先确认已经安装好了Markdown Mode&lt;/p&gt;
+
+&lt;h2 id=&quot;section-1&quot;&gt;安装&lt;/h2&gt;
+&lt;p&gt;要配置Hyde.el，首先需要下载&lt;a href=&quot;https://github.com/nibrahim/Hyde/archive/master.zip&quot;&gt;Hyde.el&lt;/a&gt;。解压到emacs.d的目录下。然后在自己的配置文件中添加下面的句子&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-lisp&quot;&gt;(add-to-list &#39;load-path (concat config-directory &quot;/hyde/hyde*.el&quot;))
+(require &#39;hyde)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;博主只维护了一个博客，因此可以在Emacs配置文件中配置一个默认的博客源路径，免得每次启动都要指定这个路径。在配置文件中加入&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-lisp&quot;&gt;(setq hyde-home &quot;path/to/your/blog/&quot;)
+(setq hyde/jekyll-command &quot;bundle exec jekyll build&quot;)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;em&gt;千万注意这个路径最后需要加上’/’，否则会报错&lt;/em&gt;
+&lt;em&gt;jekyll-command命令并不是必须的，然而在我的MacOS中直接运行jekyll会报依赖错误。由于本人对Ruby实在不了解，于是就用了这个笨办法。&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;在当前的Hyde.el版本(a8cd6ed)中，存在无法读取默认博客源文件路径的问题，需要修改Hyde.el最后部分&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-lisp&quot;&gt;(jekyll-root (or home
+                          (hyde/ask-for-jekyll-root)))
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;为&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-lisp&quot;&gt;(jekyll-root (or hyde-home (or home
+                          (hyde/ask-for-jekyll-root))))
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;section-2&quot;&gt;使用&lt;/h2&gt;
+&lt;p&gt;在需要写博客时，打开Emacs，执行M-x hyde，即可打开Hyde Mode。在设置了默认路径的情况下，不需要输入即可自动进入Major Mode界面。使用光标操作可以选择文件，回车打开文件。&lt;/p&gt;
+
+&lt;p&gt;在Major Mode下的主要操作有：
+* n 新建新的草稿
+* c 提交当前文章，&lt;em&gt;输入文章标题时尽量用英文，以便生成英文的文章文件名，进入编辑模式后再修改title字段来修改文章标题&lt;/em&gt;
+* P 推送所有未提交的commit（只是版本控制的提交，并非部署)
+* j 运行Jekyll 
+* d 部署该博客
+* g 刷新博客
+* p 将一个草稿提交为一个文章
+* q 退出Hyde
+* RET 打开指定文件进行编辑。&lt;/p&gt;
+
+&lt;p&gt;在文章编辑Mode下的操作有：
+* C-c C-c 保存并提交文件
+* C-c C-v 预览文件，只能包含Markdown预览，无法对Liquid Tags做预览。
+Preview file (this is a markdown preview so extra liquid tags will not work).
+* C-c C-i 向文章中插入文件，该图片文件会自动拷贝到最终发布的网站中，十分方便&lt;/p&gt;
+
+&lt;h1 id=&quot;section-3&quot;&gt;其他问题&lt;/h1&gt;</content><category term="Emacs" /><summary>前传
+这博客大概两三年没有更新了，突然感觉是时候重新拾起来了。之前出于对Python的执念强行把生成器从Jekyll换成了Pelican。回头发现真还是Jekyll的社区比较发达，最终又重新换回了Jekyll。本篇博文就来说说配置Jekyll写作环境的事情。</summary></entry><entry><title>在Visual Studio 2013上编译boost 1.55</title><link href="/2013/315/vs2013-boost.html" rel="alternate" type="text/html" title="在Visual Studio 2013上编译boost 1.55" /><published>2013-11-11T00:00:00+08:00</published><updated>2013-11-11T00:00:00+08:00</updated><id>/2013/315/vs2013-boost</id><content type="html" xml:base="/2013/315/vs2013-boost.html">&lt;p&gt;在Visual Studio 2013(msvc12)上编译boost 1.55确实不是很容易。网上的教程大多过于陈旧，还有几个与VS不兼容的问题还没有修复。这篇文章总结了如何编译安装64位版本的boost 1.55 beta 1、修复一些小Bug，以及如何设置Visual Studio进行boost开发。其中某些不兼容问题在1.54版本中依然存在，同样可以用本文中的方法解决。&lt;/p&gt;
 
 &lt;h1 id=&quot;boost&quot;&gt;下载boost&lt;/h1&gt;
 
@@ -357,81 +414,4 @@ Ronald于2012-7-14午夜&lt;/p&gt;</content><category term="JavaScript" /><categ
 
 &lt;p&gt;PS:21:51更新，增加了过滤CNAME记录的功能，解决有跳转网站的解析问题，请下载最新的代码文件&lt;/p&gt;
 
-&lt;p&gt;2012-4-4:有些同学在问gfwList是用什么加密的，其实gfwList只是用Base64编码进行了压缩，只需要用相应的软件即可解码，详情请见维基百科。这个脚本里用的是Python中自带的base64模块。&lt;/p&gt;</content><category term="Python" /><category term="gfwList" /><summary>ZZJ于8月17日提出用gfwList的网址通过可信的DNS转换成IP，写入hosts文件进而实现翻墙的方法。鄙人通过Python脚本进行了实现。代码丑陋望大牛指教。</summary></entry><entry><title>stdcall和cdecl详解</title><link href="/2011/120/stdcallcdecl.html" rel="alternate" type="text/html" title="stdcall和cdecl详解" /><published>2011-04-30T00:00:00+08:00</published><updated>2011-04-30T00:00:00+08:00</updated><id>/2011/120/stdcallcdecl</id><content type="html" xml:base="/2011/120/stdcallcdecl.html">&lt;p&gt;前些天搞dr.com的破解时有很多收获，一直想总结一下，以后也许有用，今天开个头，以后有时间再慢慢整理。&lt;/p&gt;
-
-&lt;p&gt;写过dll的同学都知道stdcall 函数和一般的C函数是不一样的。最直观的不同就是在声明时stdcall函数要加上宏WINAPI。研究过导出表的同学可能会对这个问题有更深入的理解，因为当你输出一个C函数时，通常会加上特定的名字修饰。比如_foo@4（这个修饰方式和编译器实现相关）。你必须强制使用正确的函数名以防止LoadLibrary函数无法访问你的C函数。&lt;br /&gt;
-那么究竟什么是stdcall，为什么有stdcall和cdecl的区别，为什么cdecl（也就是一般的C函数）要加上如此奇怪的名字装饰呢。本文将从编译和执行的角度解释以上问题。阅读本文你需要一定的汇编基础。不太明白的同学请参看有关资料。&lt;br /&gt;
-一下叙述默认使用IA32结构。汇编代码会使用AT&amp;amp;T风格描述。如果你熟悉Intel风格，其实你要做的只是去掉每个指令的修饰后缀（如movl 中的l），它代表操作数的大小，l表示long，也就是4Byte。另外你需要忽略寄存器前的%和立即数前的$。&lt;/p&gt;
-
-&lt;h1 id=&quot;section&quot;&gt;过程（函数）调用的一般步骤&lt;/h1&gt;
-
-&lt;p&gt;如果你不是使用不靠谱的国内汇编教材，你都会在学习汇编语言或计算机组成原理时了解过程调用的一般步骤。如果你已经熟悉过程调用的步骤，你可以直接跳到下一节。&lt;br /&gt;
-就像没有灯光的时候，你女伴的长相不是需要关注的第一问题一样。在较底层的空间里徘徊时，我们通常不需要区别函数和过程。因为函数只不过是有返回值的过程，而在机器层面，返回不过是把需要返回的值赋给指定的寄存器而已。&lt;br /&gt;
-典型的过程调用有以下几个步骤。&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;将参数放到指定的区域，对于我们今天讨论的问题，这一步骤相当于以指定方式将参数压栈。而对于fastcall，参数是通过寄存器传递的。这也解释了它名字的来历。&lt;/li&gt;
-  &lt;li&gt;将记录当前程序运行位置的寄存器值（IA32中为EIP）压栈。跳转到被调用过程所在的内存区域。IA32提供call指令完成上述过程。虽说call看起来只有一个指令，可是它处理的问题有很多。首先，它会将%EIP压栈，这是用来返回的，因为当被调过程完成时需要知道如何回到主调过程。然后他会执行一个类似于jmp的指令跳转到指定程序的位置。&lt;br /&gt;
-现在出现的一个问题是，当被调用过程开始执行时，栈顶指针和栈基址貌似与正常不符，一般情况下，一个过程应该能确定启动时自己的栈基址和栈顶指针相同。而对于被调用过程，这一假设通常由于局部变量的使用（他们位于栈中）而不成立。因此，一个过程开始时，会把栈基址压栈，然后将栈基址设为当前的栈顶指针。这就是为什么每个过程前面有类似pushl %ebp和mov %esp, %ebp&lt;/li&gt;
-  &lt;li&gt;在返回之前，你需要处理一些善后的事宜，包括恢复系统栈的栈基址和栈顶指针。你可以使用leave指令来完成恢复栈基址的工作。&lt;/li&gt;
-  &lt;li&gt;当过程完成时，从栈里弹出主调用过程停止处的地址。并跳转过去，使得主调用过程继续进行。IA32提供ret完成上述过程。有时你可以使用retn n来执行上述步骤，后面跟的n是在返回之后esp将会增加的值。&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h1 id=&quot;section-1&quot;&gt;关键问题：谁来善后栈顶指针&lt;/h1&gt;
-&lt;p&gt;刚才说过leave指针可以用来恢复栈基址。它的工作方式是先将栈顶指针设为栈基址，这里如前面所说，保存着主调进程的栈基址。然后将这个栈基址弹出，这时栈顶指针会指向返回地址，而栈基址会恢复到主调进程调用之前的位置。&lt;br /&gt;
-好吧，如果你晕了，那你可能需要找一个汇编的书研究一下，而且这与我们所讨论的问题没什么关系。&lt;br /&gt;
-那么，如何恢复栈顶指针呢？&lt;br /&gt;
-栈顶指针之所以会改变，是由于在调用被调过程之前主调过程会通过压栈来传递参数（在被调过程中对于栈的改变，哪怕是调用另外一个过程，都会由于leave的调用而恢复）。那么如何将这些参数清空就是我们需要考虑的问题了。这也正是stdcall和cdecl的区别。&lt;br /&gt;
-一个典型的stdcall过程调用汇编代码如下所示：&lt;br /&gt;
-主调用过程 :&lt;/p&gt;
-
-&lt;div class=&quot;language-c highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;pushl&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;arg1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Step&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;  
-&lt;span class=&quot;n&quot;&gt;pushl&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;arg2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;   
-  
-&lt;span class=&quot;n&quot;&gt;call&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;foo&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Step&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;  
-
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;被调用过程:&lt;/p&gt;
-
-&lt;div class=&quot;language-c highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;pushl&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ebp&lt;/span&gt;  
-&lt;span class=&quot;n&quot;&gt;movl&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;esp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ebp&lt;/span&gt;  
-
-&lt;span class=&quot;err&quot;&gt;…&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Here&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&#39;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;s&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;the&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;body&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;of&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;procedure&lt;/span&gt;  
-
-&lt;span class=&quot;n&quot;&gt;leave&lt;/span&gt;  &lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Step&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;  
-&lt;span class=&quot;n&quot;&gt;retn&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;8&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Step&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Here&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;8&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;is&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;the&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;size&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;of&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;arguments&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Byte&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;  
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;刚才说过retn会才执行完成之后（也就是执行主调过程中call之后那个指令之前），对%esp进行减运算。减数就是它的参数。 
-嗯，大家应该明白了， stdcall中被调用过程将会自己处理%esp的善后问题。那么，这就很容易理解为什么大家都说stdcall不能传递可变长度的参数了。因为只有主调过程知道到底push了多少参数到栈里，所以被调函数无法进行清理操作。 
-那cdecl是什么各位应该明白了。是的，是在主调过程中恢复%esp。我们来看一下。&lt;/p&gt;
-
-&lt;p&gt;主调用过程：&lt;/p&gt;
-
-&lt;div class=&quot;language-c highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;pushl&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;arg2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Step&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;  
-&lt;span class=&quot;n&quot;&gt;pushl&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;arg1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;   
-
-&lt;span class=&quot;n&quot;&gt;call&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;bar&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Step&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;  
-&lt;span class=&quot;n&quot;&gt;addl&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;esp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;8&lt;/span&gt;  
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;被调用过程:
-```c
-pushl %ebp&lt;br /&gt;
-movl %esp, %ebp&lt;/p&gt;
-
-&lt;p&gt;… ;Here’s the body of procedure&lt;/p&gt;
-
-&lt;p&gt;leave  ;Step 3&lt;br /&gt;
-ret	   ;Step 4&lt;br /&gt;
-```&lt;/p&gt;
-
-&lt;p&gt;看出来了，主调过程自己处理了参数所占的栈空间。细心的同学可能会发现参数是以倒序压入的。很多人说为什么要后面的参数的先push。这个问题我们可以这样看。&lt;br /&gt;
-学过C语言的知道，函数一般用第一个参数指明究竟有多少参数被传递。比如main中的argc，printf中的format字符串等。因此第一个参数的地址必须容易确定。当参数全部push完成后，离被调函数的栈基址最近的应该是最后一个被push的参数。那么如果使用倒序的push顺序。第一个参数的位置很简单的可以确定为%ebp-4（有一个%eip也被压栈了，记得么）。这是的被调函数更容易编写。&lt;/p&gt;
-
-&lt;h1 id=&quot;section-2&quot;&gt;关于修饰符&lt;/h1&gt;
-&lt;p&gt;最开始我们讲到，用C没有加stdcall修饰时导出的函数名会被修饰。如void foo(int arg1, int arg2)会被修饰为_foo@8，现在我们知道了。因为 stdcall有一个固定的参数列表，如果参数数量不一样会造成参数的错传（cdecl因为是倒序输入，即使参数数量过多，只要顺序正确就不会有问题），所以当C函数 被导出成stdcall时会明确的加上指明参数大小的修饰符。因此@8就是说foo函数的参数共占了 8个字节。&lt;/p&gt;</content><category term="C/C++" /><summary>前些天搞dr.com的破解时有很多收获，一直想总结一下，以后也许有用，今天开个头，以后有时间再慢慢整理。</summary></entry></feed>
+&lt;p&gt;2012-4-4:有些同学在问gfwList是用什么加密的，其实gfwList只是用Base64编码进行了压缩，只需要用相应的软件即可解码，详情请见维基百科。这个脚本里用的是Python中自带的base64模块。&lt;/p&gt;</content><category term="Python" /><category term="gfwList" /><summary>ZZJ于8月17日提出用gfwList的网址通过可信的DNS转换成IP，写入hosts文件进而实现翻墙的方法。鄙人通过Python脚本进行了实现。代码丑陋望大牛指教。</summary></entry></feed>
