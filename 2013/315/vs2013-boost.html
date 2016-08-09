@@ -179,21 +179,22 @@ boost/mpl/assert.hpp, line 137:</p>
 <p>打开需要使用Boost的项目，选择项目-&gt;XX(你的项目名)属性，在平台中选择正确的平台(如果是64位系统需要选择x64)，选择正确的配置(如果使用release版本的库则选择Release)。在左侧的树状图中选择配置属性-&gt;VC++目录。添加包含目录和库目录。假设boost解压完成的根目录为%boostRoot%（在我这里是D:\Program Files\boost\boost_1_55_0b1），则包含目录应该添加%boostRoot%，而库目录应该添加%boostRoot%\stage\lib。
 完成设置后可以用以下程序来测试设置是否正确</p>
 
-<pre><code class="language-C++">#include &lt;boost/thread/thread.hpp&gt;
+<div class="language-c highlighter-rouge"><pre class="highlight"><code><span class="cp">#include &lt;boost/thread/thread.hpp&gt;
 #include &lt;iostream&gt;
+</span>
+<span class="kt">void</span> <span class="nf">hello</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span><span class="s">"Hello world, I'm a thread!"</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="p">}</span>
 
-void hello()
-{
-    std::cout &lt;&lt;"Hello world, I'm a thread!" &lt;&lt; std::endl;
-}
-
-int main(int argc, char* argv[])
-{
-    boost::thread thrd(&amp;hello);
-    thrd.join();
-    return 0;
-}
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span><span class="o">*</span> <span class="n">argv</span><span class="p">[])</span>
+<span class="p">{</span>
+    <span class="n">boost</span><span class="o">::</span><span class="kr">thread</span> <span class="n">thrd</span><span class="p">(</span><span class="o">&amp;</span><span class="n">hello</span><span class="p">);</span>
+    <span class="n">thrd</span><span class="p">.</span><span class="n">join</span><span class="p">();</span>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
 </code></pre>
+</div>
 
       <footer class="entry-meta">
         <span class="entry-tags"><a href="/tags/#Visual Studio" title="Pages tagged Visual Studio" class="tag"><span class="term">Visual Studio</span></a><a href="/tags/#boost" title="Pages tagged boost" class="tag"><span class="term">boost</span></a><a href="/tags/#C/C++" title="Pages tagged C/C++" class="tag"><span class="term">C/C++</span></a></span>
@@ -215,7 +216,7 @@ int main(int argc, char* argv[])
     </div><!-- /.read-more-header -->
     <div class="read-more-content">
       <h3><a href="/2016/222/migrate_to_jekyll.html" title="（重新）迁移到Jekyll">（重新）迁移到Jekyll</a></h3>
-      <p># 前传这博客大概两三年没有更新了，突然感觉是时候重新拾起来了。之前出于对Python的执念强行把生成器从Jekyll换成了Pelican。回头发现真还是Jekyll的社区比较发达，最终又重新换回了Jekyll。本篇博文就来说说配置Jekyll写作环境的事情。# 配置Jek...&hellip; <a href="/2016/222/migrate_to_jekyll.html">Continue reading</a></p>
+      <p># 前传这博客大概两三年没有更新了，突然感觉是时候重新拾起来了。之前出于对Python的执念强行把生成器从Jekyll换成了Pelican。回头发现真还是Jekyll的社区比较发达，最终又重新换回了Jekyll，真是怨念啊。本篇博文就来说说配置Jekyll写作环境的事情。#...&hellip; <a href="/2016/222/migrate_to_jekyll.html">Continue reading</a></p>
     </div><!-- /.read-more-content -->
   
   <div class="read-more-list">

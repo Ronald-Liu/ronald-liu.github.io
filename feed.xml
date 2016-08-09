@@ -1,61 +1,90 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom"><generator uri="http://jekyllrb.com" version="3.1.6">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2016-08-09T23:01:44+08:00</updated><id>/</id><title>Ronald的部落格</title><subtitle>一个人的博物馆</subtitle><entry><title>（重新）迁移到Jekyll</title><link href="/2016/222/migrate_to_jekyll.html" rel="alternate" type="text/html" title="（重新）迁移到Jekyll" /><published>2016-08-09T00:00:00+08:00</published><updated>2016-08-09T00:00:00+08:00</updated><id>/2016/222/migrate_to_jekyll</id><content type="html" xml:base="/2016/222/migrate_to_jekyll.html">&lt;h1 id=&quot;section&quot;&gt;前传&lt;/h1&gt;
-&lt;p&gt;这博客大概两三年没有更新了，突然感觉是时候重新拾起来了。之前出于对Python的执念强行把生成器从Jekyll换成了Pelican。回头发现真还是Jekyll的社区比较发达，最终又重新换回了Jekyll。本篇博文就来说说配置Jekyll写作环境的事情。&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom"><generator uri="http://jekyllrb.com" version="3.1.6">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2016-08-09T23:45:37+08:00</updated><id>/</id><title>Ronald的部落格</title><subtitle>一个人的博物馆</subtitle><entry><title>（重新）迁移到Jekyll</title><link href="/2016/222/migrate_to_jekyll.html" rel="alternate" type="text/html" title="（重新）迁移到Jekyll" /><published>2016-08-09T00:00:00+08:00</published><updated>2016-08-09T00:00:00+08:00</updated><id>/2016/222/migrate_to_jekyll</id><content type="html" xml:base="/2016/222/migrate_to_jekyll.html">&lt;h1 id=&quot;section&quot;&gt;前传&lt;/h1&gt;
+&lt;p&gt;这博客大概两三年没有更新了，突然感觉是时候重新拾起来了。之前出于对Python的执念强行把生成器从Jekyll换成了Pelican。回头发现真还是Jekyll的社区比较发达，最终又重新换回了Jekyll，真是怨念啊。本篇博文就来说说配置Jekyll写作环境的事情。&lt;/p&gt;
 
 &lt;h1 id=&quot;jekyll&quot;&gt;配置Jekyll&lt;/h1&gt;
 
-&lt;h1 id=&quot;emacs&quot;&gt;Emacs配置&lt;/h1&gt;
+&lt;h2 id=&quot;section-1&quot;&gt;安装&lt;/h2&gt;
+
+&lt;p&gt;首先你需要有基本的Ruby运行环境和Gem&lt;br /&gt;
+之后安装Bundler  &lt;code class=&quot;highlighter-rouge&quot;&gt;gem install bundler&lt;/code&gt;并且安装Jekyll和它依赖的所有包。&lt;/p&gt;
+
+&lt;h2 id=&quot;section-2&quot;&gt;配置网站&lt;/h2&gt;
+
+&lt;p&gt;Jekyll作为一个静态网站生成器，具有极其功能的同时，配置上也有相当的复杂性。因此建立一个博客最简单的方式就是克隆已有的主题，进行一定的自定义配置，然后将自己的博文直接拷贝进去。&lt;br /&gt;
+博主使用的主题是&lt;a href=&quot;https://mademistakes.com/work/hpstr-jekyll-theme/&quot;&gt;HPSTR&lt;/a&gt;，可以直接从它的Github主页上克隆，或下载源代码包到本地目录。通过修改_config.yml文件来定制自己的博客 &lt;br /&gt;
+博客文章全部放置在 &lt;code class=&quot;highlighter-rouge&quot;&gt;_posts&lt;/code&gt;目录中，可以看看主题自带的一些示例文章来学习具体的语法。&lt;br /&gt;
+虽然GitHub提供了Jekyll的环境，博主作为控制欲爆棚的汉子还是希望编译的过程运行在本地，也方便前期网站参数的调试。而为了方便将编译完之后的文件推送到GitHub Pages上，可以将自己的Github Pages(路径是xxx.github.io的那个)clone到源文件目录的&lt;code class=&quot;highlighter-rouge&quot;&gt;_site&lt;/code&gt;目录中，这样每次进行Jekyll编译之后，只需要在&lt;code class=&quot;highlighter-rouge&quot;&gt;_site&lt;/code&gt;目录中执行&lt;code class=&quot;highlighter-rouge&quot;&gt;git add .&lt;/code&gt; 和 &lt;code class=&quot;highlighter-rouge&quot;&gt;git push&lt;/code&gt;就可以完成Github Pages的更新&lt;/p&gt;
+
+&lt;h1 id=&quot;emacs&quot;&gt;配置Emacs&lt;/h1&gt;
 &lt;p&gt;Hyde.el是一个Emacs上用于管理Jekyll博客的Mode。它包含了一个前端，一个管理版本的后端和一个可以对写作过程做提示的Markdown编辑模式。本章介绍在MacOS环境下配置Hyde.el的过程。
 请首先确认已经安装好了Markdown Mode&lt;/p&gt;
 
-&lt;h2 id=&quot;section-1&quot;&gt;安装&lt;/h2&gt;
+&lt;h2 id=&quot;section-3&quot;&gt;安装&lt;/h2&gt;
 &lt;p&gt;要配置Hyde.el，首先需要下载&lt;a href=&quot;https://github.com/nibrahim/Hyde/archive/master.zip&quot;&gt;Hyde.el&lt;/a&gt;。解压到emacs.d的目录下。然后在自己的配置文件中添加下面的句子&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-lisp&quot;&gt;(add-to-list &#39;load-path (concat config-directory &quot;/hyde/hyde*.el&quot;))
-(require &#39;hyde)
+&lt;div class=&quot;language-common_lisp highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;add-to-list&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;&#39;load-path&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;concat&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;config-directory&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;/hyde/hyde*.el&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;  
+&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;require&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;&#39;hyde&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
 
 &lt;p&gt;博主只维护了一个博客，因此可以在Emacs配置文件中配置一个默认的博客源路径，免得每次启动都要指定这个路径。在配置文件中加入&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-lisp&quot;&gt;(setq hyde-home &quot;path/to/your/blog/&quot;)
-(setq hyde/jekyll-command &quot;bundle exec jekyll build&quot;)
+&lt;div class=&quot;language-common_lisp highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;setq&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;hyde-home&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;path/to/your/blog/&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;  
+&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;setq&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;hyde/jekyll-command&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;bundle exec jekyll build&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
 &lt;p&gt;&lt;em&gt;千万注意这个路径最后需要加上’/’，否则会报错&lt;/em&gt;
 &lt;em&gt;jekyll-command命令并不是必须的，然而在我的MacOS中直接运行jekyll会报依赖错误。由于本人对Ruby实在不了解，于是就用了这个笨办法。&lt;/em&gt;&lt;/p&gt;
 
 &lt;p&gt;在当前的Hyde.el版本(a8cd6ed)中，存在无法读取默认博客源文件路径的问题，需要修改Hyde.el最后部分&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-lisp&quot;&gt;(jekyll-root (or home
-                          (hyde/ask-for-jekyll-root)))
+&lt;div class=&quot;language-common_lisp highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;jekyll-root&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;or&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;home&lt;/span&gt;  
+                          &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;hyde/ask-for-jekyll-root&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)))&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
 
 &lt;p&gt;为&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-lisp&quot;&gt;(jekyll-root (or hyde-home (or home
-                          (hyde/ask-for-jekyll-root))))
+&lt;div class=&quot;language-common_lisp highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;jekyll-root&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;or&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;hyde-home&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;or&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;home&lt;/span&gt;  
+                          &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;hyde/ask-for-jekyll-root&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))))&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
 
-&lt;h2 id=&quot;section-2&quot;&gt;使用&lt;/h2&gt;
+&lt;p&gt;Hyde提供了部署静态网站的快捷键，然而由于不同的网站部署的方式不尽相同，因此需要对Hyde进行对应的配置来让你的网站可以根据需要来进行部署。&lt;br /&gt;
+前文介绍的Jekyll部署方式使用的是本地编译静态网站，而不是利用Github Pages内置的Jekyll。因此部署工作也就是直接将编译完的网站推送到本人的Github Repo中。为了完成这一点，需要对网站的部署命令进行自定义。方法是在blog源文件主目录内创建&lt;code class=&quot;highlighter-rouge&quot;&gt;.hyde.el&lt;/code&gt;文件，并填入下列命令&lt;/p&gt;
+
+&lt;div class=&quot;language-common_lisp highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;setq&lt;/span&gt;  &lt;span class=&quot;nv&quot;&gt;hyde/deploy-command&lt;/span&gt;   
+    &lt;span class=&quot;s&quot;&gt;&quot;cd path/to/your/blog/_site; git add -A . ; git commit -m autopost`date +%m%d%Y%H%M%S`;git push&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;替换其中的path/to/your/blog为你的源文件目录&lt;/p&gt;
+
+&lt;h2 id=&quot;section-4&quot;&gt;使用&lt;/h2&gt;
 &lt;p&gt;在需要写博客时，打开Emacs，执行M-x hyde，即可打开Hyde Mode。在设置了默认路径的情况下，不需要输入即可自动进入Major Mode界面。使用光标操作可以选择文件，回车打开文件。&lt;/p&gt;
 
-&lt;p&gt;在Major Mode下的主要操作有：
-* n 新建新的草稿
-* c 提交当前文章，&lt;em&gt;输入文章标题时尽量用英文，以便生成英文的文章文件名，进入编辑模式后再修改title字段来修改文章标题&lt;/em&gt;
-* P 推送所有未提交的commit（只是版本控制的提交，并非部署)
-* j 运行Jekyll 
-* d 部署该博客
-* g 刷新博客
-* p 将一个草稿提交为一个文章
-* q 退出Hyde
-* RET 打开指定文件进行编辑。&lt;/p&gt;
+&lt;p&gt;在Major Mode下的主要操作有：&lt;/p&gt;
 
-&lt;p&gt;在文章编辑Mode下的操作有：
-* C-c C-c 保存并提交文件
-* C-c C-v 预览文件，只能包含Markdown预览，无法对Liquid Tags做预览。
-Preview file (this is a markdown preview so extra liquid tags will not work).
-* C-c C-i 向文章中插入文件，该图片文件会自动拷贝到最终发布的网站中，十分方便&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;n 新建新的草稿&lt;/li&gt;
+  &lt;li&gt;c 提交当前文章，&lt;em&gt;输入文章标题时尽量用英文，以便生成英文的文章文件名，进入编辑模式后再修改title字段来修改文章标题&lt;/em&gt;&lt;/li&gt;
+  &lt;li&gt;P 推送所有未提交的commit（只是版本控制的提交，并非部署)&lt;/li&gt;
+  &lt;li&gt;j 运行Jekyll&lt;/li&gt;
+  &lt;li&gt;d 部署该博客&lt;/li&gt;
+  &lt;li&gt;g 刷新博客&lt;/li&gt;
+  &lt;li&gt;p 将一个草稿提交为一个文章&lt;/li&gt;
+  &lt;li&gt;q 退出Hyde&lt;/li&gt;
+  &lt;li&gt;RET 打开指定文件进行编辑。&lt;/li&gt;
+&lt;/ul&gt;
 
-&lt;h1 id=&quot;section-3&quot;&gt;其他问题&lt;/h1&gt;</content><category term="Emacs" /><summary>前传
-这博客大概两三年没有更新了，突然感觉是时候重新拾起来了。之前出于对Python的执念强行把生成器从Jekyll换成了Pelican。回头发现真还是Jekyll的社区比较发达，最终又重新换回了Jekyll。本篇博文就来说说配置Jekyll写作环境的事情。</summary></entry><entry><title>在Visual Studio 2013上编译boost 1.55</title><link href="/2013/315/vs2013-boost.html" rel="alternate" type="text/html" title="在Visual Studio 2013上编译boost 1.55" /><published>2013-11-11T00:00:00+08:00</published><updated>2013-11-11T00:00:00+08:00</updated><id>/2013/315/vs2013-boost</id><content type="html" xml:base="/2013/315/vs2013-boost.html">&lt;p&gt;在Visual Studio 2013(msvc12)上编译boost 1.55确实不是很容易。网上的教程大多过于陈旧，还有几个与VS不兼容的问题还没有修复。这篇文章总结了如何编译安装64位版本的boost 1.55 beta 1、修复一些小Bug，以及如何设置Visual Studio进行boost开发。其中某些不兼容问题在1.54版本中依然存在，同样可以用本文中的方法解决。&lt;/p&gt;
+&lt;p&gt;在文章编辑Mode下的操作有：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;C-c C-c 保存并提交文件&lt;/li&gt;
+  &lt;li&gt;C-c C-v 预览文件，只能包含Markdown预览，无法对Liquid Tags做预览。&lt;/li&gt;
+  &lt;li&gt;C-c C-i 向文章中插入文件，该图片文件会自动拷贝到最终发布的网站中，十分方便&lt;/li&gt;
+&lt;/ul&gt;</content><category term="Emacs" /><summary>前传
+这博客大概两三年没有更新了，突然感觉是时候重新拾起来了。之前出于对Python的执念强行把生成器从Jekyll换成了Pelican。回头发现真还是Jekyll的社区比较发达，最终又重新换回了Jekyll，真是怨念啊。本篇博文就来说说配置Jekyll写作环境的事情。</summary></entry><entry><title>在Visual Studio 2013上编译boost 1.55</title><link href="/2013/315/vs2013-boost.html" rel="alternate" type="text/html" title="在Visual Studio 2013上编译boost 1.55" /><published>2013-11-11T00:00:00+08:00</published><updated>2013-11-11T00:00:00+08:00</updated><id>/2013/315/vs2013-boost</id><content type="html" xml:base="/2013/315/vs2013-boost.html">&lt;p&gt;在Visual Studio 2013(msvc12)上编译boost 1.55确实不是很容易。网上的教程大多过于陈旧，还有几个与VS不兼容的问题还没有修复。这篇文章总结了如何编译安装64位版本的boost 1.55 beta 1、修复一些小Bug，以及如何设置Visual Studio进行boost开发。其中某些不兼容问题在1.54版本中依然存在，同样可以用本文中的方法解决。&lt;/p&gt;
 
 &lt;h1 id=&quot;boost&quot;&gt;下载boost&lt;/h1&gt;
 
@@ -109,21 +138,22 @@ boost/mpl/assert.hpp, line 137:&lt;/p&gt;
 &lt;p&gt;打开需要使用Boost的项目，选择项目-&amp;gt;XX(你的项目名)属性，在平台中选择正确的平台(如果是64位系统需要选择x64)，选择正确的配置(如果使用release版本的库则选择Release)。在左侧的树状图中选择配置属性-&amp;gt;VC++目录。添加包含目录和库目录。假设boost解压完成的根目录为%boostRoot%（在我这里是D:\Program Files\boost\boost_1_55_0b1），则包含目录应该添加%boostRoot%，而库目录应该添加%boostRoot%\stage\lib。
 完成设置后可以用以下程序来测试设置是否正确&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-C++&quot;&gt;#include &amp;lt;boost/thread/thread.hpp&amp;gt;
+&lt;div class=&quot;language-c highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;cp&quot;&gt;#include &amp;lt;boost/thread/thread.hpp&amp;gt;
 #include &amp;lt;iostream&amp;gt;
+&lt;/span&gt;
+&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;hello&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;cout&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Hello world, I&#39;m a thread!&quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;endl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
 
-void hello()
-{
-    std::cout &amp;lt;&amp;lt;&quot;Hello world, I&#39;m a thread!&quot; &amp;lt;&amp;lt; std::endl;
-}
-
-int main(int argc, char* argv[])
-{
-    boost::thread thrd(&amp;amp;hello);
-    thrd.join();
-    return 0;
-}
-&lt;/code&gt;&lt;/pre&gt;</content><category term="Visual Studio" /><category term="boost" /><category term="C/C++" /><summary>在Visual Studio 2013(msvc12)上编译boost 1.55确实不是很容易。网上的教程大多过于陈旧，还有几个与VS不兼容的问题还没有修复。这篇文章总结了如何编译安装64位版本的boost 1.55 beta 1、修复一些小Bug，以及如何设置Visual Studio进行boost开发。其中某些不兼容问题在1.54版本中依然存在，同样可以用本文中的方法解决。</summary></entry><entry><title>中国梦 宪政梦</title><link href="/2013/004/2013newyear.html" rel="alternate" type="text/html" title="中国梦 宪政梦" /><published>2013-01-04T00:00:00+08:00</published><updated>2013-01-04T00:00:00+08:00</updated><id>/2013/004/2013newyear</id><content type="html" xml:base="/2013/004/2013newyear.html">&lt;p&gt;南方周末2013年新年献辞，转载防河蟹&lt;/p&gt;
+&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;argc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;argv&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[])&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;boost&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;kr&quot;&gt;thread&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;thrd&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;hello&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;thrd&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;join&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;</content><category term="Visual Studio" /><category term="boost" /><category term="C/C++" /><summary>在Visual Studio 2013(msvc12)上编译boost 1.55确实不是很容易。网上的教程大多过于陈旧，还有几个与VS不兼容的问题还没有修复。这篇文章总结了如何编译安装64位版本的boost 1.55 beta 1、修复一些小Bug，以及如何设置Visual Studio进行boost开发。其中某些不兼容问题在1.54版本中依然存在，同样可以用本文中的方法解决。</summary></entry><entry><title>中国梦 宪政梦</title><link href="/2013/004/2013newyear.html" rel="alternate" type="text/html" title="中国梦 宪政梦" /><published>2013-01-04T00:00:00+08:00</published><updated>2013-01-04T00:00:00+08:00</updated><id>/2013/004/2013newyear</id><content type="html" xml:base="/2013/004/2013newyear.html">&lt;p&gt;南方周末2013年新年献辞，转载防河蟹&lt;/p&gt;
 
 &lt;p&gt;天地之间，时间绽放。 
 这是我们在2013年的第一次相见，愿你被梦想点亮。 

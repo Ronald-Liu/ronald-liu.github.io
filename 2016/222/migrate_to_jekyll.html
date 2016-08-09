@@ -126,63 +126,91 @@ Reading time ~1 minute
     </header>
     <div class="entry-content">
       <h1 id="section">前传</h1>
-<p>这博客大概两三年没有更新了，突然感觉是时候重新拾起来了。之前出于对Python的执念强行把生成器从Jekyll换成了Pelican。回头发现真还是Jekyll的社区比较发达，最终又重新换回了Jekyll。本篇博文就来说说配置Jekyll写作环境的事情。</p>
+<p>这博客大概两三年没有更新了，突然感觉是时候重新拾起来了。之前出于对Python的执念强行把生成器从Jekyll换成了Pelican。回头发现真还是Jekyll的社区比较发达，最终又重新换回了Jekyll，真是怨念啊。本篇博文就来说说配置Jekyll写作环境的事情。</p>
 
 <h1 id="jekyll">配置Jekyll</h1>
 
-<h1 id="emacs">Emacs配置</h1>
+<h2 id="section-1">安装</h2>
+
+<p>首先你需要有基本的Ruby运行环境和Gem<br />
+之后安装Bundler  <code class="highlighter-rouge">gem install bundler</code>并且安装Jekyll和它依赖的所有包。</p>
+
+<h2 id="section-2">配置网站</h2>
+
+<p>Jekyll作为一个静态网站生成器，具有极其功能的同时，配置上也有相当的复杂性。因此建立一个博客最简单的方式就是克隆已有的主题，进行一定的自定义配置，然后将自己的博文直接拷贝进去。<br />
+博主使用的主题是<a href="https://mademistakes.com/work/hpstr-jekyll-theme/">HPSTR</a>，可以直接从它的Github主页上克隆，或下载源代码包到本地目录。通过修改_config.yml文件来定制自己的博客 <br />
+博客文章全部放置在 <code class="highlighter-rouge">_posts</code>目录中，可以看看主题自带的一些示例文章来学习具体的语法。<br />
+虽然GitHub提供了Jekyll的环境，博主作为控制欲爆棚的汉子还是希望编译的过程运行在本地，也方便前期网站参数的调试。而为了方便将编译完之后的文件推送到GitHub Pages上，可以将自己的Github Pages(路径是xxx.github.io的那个)clone到源文件目录的<code class="highlighter-rouge">_site</code>目录中，这样每次进行Jekyll编译之后，只需要在<code class="highlighter-rouge">_site</code>目录中执行<code class="highlighter-rouge">git add .</code> 和 <code class="highlighter-rouge">git push</code>就可以完成Github Pages的更新</p>
+
+<h1 id="emacs">配置Emacs</h1>
 <p>Hyde.el是一个Emacs上用于管理Jekyll博客的Mode。它包含了一个前端，一个管理版本的后端和一个可以对写作过程做提示的Markdown编辑模式。本章介绍在MacOS环境下配置Hyde.el的过程。
 请首先确认已经安装好了Markdown Mode</p>
 
-<h2 id="section-1">安装</h2>
+<h2 id="section-3">安装</h2>
 <p>要配置Hyde.el，首先需要下载<a href="https://github.com/nibrahim/Hyde/archive/master.zip">Hyde.el</a>。解压到emacs.d的目录下。然后在自己的配置文件中添加下面的句子</p>
 
-<pre><code class="language-lisp">(add-to-list 'load-path (concat config-directory "/hyde/hyde*.el"))
-(require 'hyde)
+<div class="language-common_lisp highlighter-rouge"><pre class="highlight"><code><span class="p">(</span><span class="nv">add-to-list</span> <span class="ss">'load-path</span> <span class="p">(</span><span class="nv">concat</span> <span class="nv">config-directory</span> <span class="s">"/hyde/hyde*.el"</span><span class="p">))</span>  
+<span class="p">(</span><span class="nb">require</span> <span class="ss">'hyde</span><span class="p">)</span>
 </code></pre>
+</div>
 
 <p>博主只维护了一个博客，因此可以在Emacs配置文件中配置一个默认的博客源路径，免得每次启动都要指定这个路径。在配置文件中加入</p>
 
-<pre><code class="language-lisp">(setq hyde-home "path/to/your/blog/")
-(setq hyde/jekyll-command "bundle exec jekyll build")
+<div class="language-common_lisp highlighter-rouge"><pre class="highlight"><code><span class="p">(</span><span class="k">setq</span> <span class="nv">hyde-home</span> <span class="s">"path/to/your/blog/"</span><span class="p">)</span>  
+<span class="p">(</span><span class="k">setq</span> <span class="nv">hyde/jekyll-command</span> <span class="s">"bundle exec jekyll build"</span><span class="p">)</span>
 </code></pre>
+</div>
 <p><em>千万注意这个路径最后需要加上’/’，否则会报错</em>
 <em>jekyll-command命令并不是必须的，然而在我的MacOS中直接运行jekyll会报依赖错误。由于本人对Ruby实在不了解，于是就用了这个笨办法。</em></p>
 
 <p>在当前的Hyde.el版本(a8cd6ed)中，存在无法读取默认博客源文件路径的问题，需要修改Hyde.el最后部分</p>
 
-<pre><code class="language-lisp">(jekyll-root (or home
-                          (hyde/ask-for-jekyll-root)))
+<div class="language-common_lisp highlighter-rouge"><pre class="highlight"><code><span class="p">(</span><span class="nv">jekyll-root</span> <span class="p">(</span><span class="nb">or</span> <span class="nv">home</span>  
+                          <span class="p">(</span><span class="nv">hyde/ask-for-jekyll-root</span><span class="p">)))</span>
 </code></pre>
+</div>
 
 <p>为</p>
 
-<pre><code class="language-lisp">(jekyll-root (or hyde-home (or home
-                          (hyde/ask-for-jekyll-root))))
+<div class="language-common_lisp highlighter-rouge"><pre class="highlight"><code><span class="p">(</span><span class="nv">jekyll-root</span> <span class="p">(</span><span class="nb">or</span> <span class="nv">hyde-home</span> <span class="p">(</span><span class="nb">or</span> <span class="nv">home</span>  
+                          <span class="p">(</span><span class="nv">hyde/ask-for-jekyll-root</span><span class="p">))))</span>
 </code></pre>
+</div>
 
-<h2 id="section-2">使用</h2>
+<p>Hyde提供了部署静态网站的快捷键，然而由于不同的网站部署的方式不尽相同，因此需要对Hyde进行对应的配置来让你的网站可以根据需要来进行部署。<br />
+前文介绍的Jekyll部署方式使用的是本地编译静态网站，而不是利用Github Pages内置的Jekyll。因此部署工作也就是直接将编译完的网站推送到本人的Github Repo中。为了完成这一点，需要对网站的部署命令进行自定义。方法是在blog源文件主目录内创建<code class="highlighter-rouge">.hyde.el</code>文件，并填入下列命令</p>
+
+<div class="language-common_lisp highlighter-rouge"><pre class="highlight"><code><span class="p">(</span><span class="k">setq</span>  <span class="nv">hyde/deploy-command</span>   
+    <span class="s">"cd path/to/your/blog/_site; git add -A . ; git commit -m autopost`date +%m%d%Y%H%M%S`;git push"</span><span class="p">)</span>
+</code></pre>
+</div>
+
+<p>替换其中的path/to/your/blog为你的源文件目录</p>
+
+<h2 id="section-4">使用</h2>
 <p>在需要写博客时，打开Emacs，执行M-x hyde，即可打开Hyde Mode。在设置了默认路径的情况下，不需要输入即可自动进入Major Mode界面。使用光标操作可以选择文件，回车打开文件。</p>
 
-<p>在Major Mode下的主要操作有：
-* n 新建新的草稿
-* c 提交当前文章，<em>输入文章标题时尽量用英文，以便生成英文的文章文件名，进入编辑模式后再修改title字段来修改文章标题</em>
-* P 推送所有未提交的commit（只是版本控制的提交，并非部署)
-* j 运行Jekyll 
-* d 部署该博客
-* g 刷新博客
-* p 将一个草稿提交为一个文章
-* q 退出Hyde
-* RET 打开指定文件进行编辑。</p>
+<p>在Major Mode下的主要操作有：</p>
 
-<p>在文章编辑Mode下的操作有：
-* C-c C-c 保存并提交文件
-* C-c C-v 预览文件，只能包含Markdown预览，无法对Liquid Tags做预览。
-Preview file (this is a markdown preview so extra liquid tags will not work).
-* C-c C-i 向文章中插入文件，该图片文件会自动拷贝到最终发布的网站中，十分方便</p>
+<ul>
+  <li>n 新建新的草稿</li>
+  <li>c 提交当前文章，<em>输入文章标题时尽量用英文，以便生成英文的文章文件名，进入编辑模式后再修改title字段来修改文章标题</em></li>
+  <li>P 推送所有未提交的commit（只是版本控制的提交，并非部署)</li>
+  <li>j 运行Jekyll</li>
+  <li>d 部署该博客</li>
+  <li>g 刷新博客</li>
+  <li>p 将一个草稿提交为一个文章</li>
+  <li>q 退出Hyde</li>
+  <li>RET 打开指定文件进行编辑。</li>
+</ul>
 
-<h1 id="section-3">其他问题</h1>
+<p>在文章编辑Mode下的操作有：</p>
 
+<ul>
+  <li>C-c C-c 保存并提交文件</li>
+  <li>C-c C-v 预览文件，只能包含Markdown预览，无法对Liquid Tags做预览。</li>
+  <li>C-c C-i 向文章中插入文件，该图片文件会自动拷贝到最终发布的网站中，十分方便</li>
+</ul>
 
       <footer class="entry-meta">
         <span class="entry-tags"><a href="/tags/#Emacs" title="Pages tagged Emacs" class="tag"><span class="term">Emacs</span></a></span>
