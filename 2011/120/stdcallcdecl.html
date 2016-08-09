@@ -1,0 +1,296 @@
+<!doctype html>
+<!--[if lt IE 7]><html class="no-js lt-ie9 lt-ie8 lt-ie7" lang="en"> <![endif]-->
+<!--[if (IE 7)&!(IEMobile)]><html class="no-js lt-ie9 lt-ie8" lang="en"><![endif]-->
+<!--[if (IE 8)&!(IEMobile)]><html class="no-js lt-ie9" lang="en"><![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en"><!--<![endif]-->
+<head>
+<meta charset="utf-8">
+<title>stdcall和cdecl详解 &#8211; Ronald的部落格</title>
+<meta name="description" content="前些天搞dr.com的破解时有很多收获，一直想总结一下，以后也许有用，今天开个头，以后有时间再慢慢整理。">
+<meta name="keywords" content="C/C++">
+
+
+
+<!-- Open Graph -->
+<meta property="og:locale" content="en_US">
+<meta property="og:type" content="article">
+<meta property="og:title" content="stdcall和cdecl详解">
+<meta property="og:description" content="前些天搞dr.com的破解时有很多收获，一直想总结一下，以后也许有用，今天开个头，以后有时间再慢慢整理。">
+<meta property="og:url" content="/2011/120/stdcallcdecl.html">
+<meta property="og:site_name" content="Ronald的部落格">
+
+
+
+
+
+<link rel="canonical" href="/2011/120/stdcallcdecl.html">
+<link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Ronald的部落格 Feed">
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<!-- Webfonts -->
+<link href="//fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic" rel="stylesheet" type="text/css">
+
+<meta http-equiv="cleartype" content="on">
+
+<!-- Load Modernizr -->
+<script src="/assets/js/vendor/modernizr-2.6.2.custom.min.js"></script>
+
+<!-- Icons -->
+<!-- 16x16 -->
+<link rel="shortcut icon" href="/favicon.ico">
+<!-- 32x32 -->
+<link rel="shortcut icon" href="/favicon.png">
+<!-- 57x57 (precomposed) for iPhone 3GS, pre-2011 iPod Touch and older Android devices -->
+<link rel="apple-touch-icon-precomposed" href="/images/apple-touch-icon-precomposed.png">
+<!-- 72x72 (precomposed) for 1st generation iPad, iPad 2 and iPad mini -->
+<link rel="apple-touch-icon-precomposed" sizes="72x72" href="/images/apple-touch-icon-72x72-precomposed.png">
+<!-- 114x114 (precomposed) for iPhone 4, 4S, 5 and post-2011 iPod Touch -->
+<link rel="apple-touch-icon-precomposed" sizes="114x114" href="/images/apple-touch-icon-114x114-precomposed.png">
+<!-- 144x144 (precomposed) for iPad 3rd and 4th generation -->
+<link rel="apple-touch-icon-precomposed" sizes="144x144" href="/images/apple-touch-icon-144x144-precomposed.png">
+
+
+
+</head>
+
+<body id="post" >
+
+<!--[if lt IE 9]><div class="upgrade"><strong><a href="http://whatbrowser.org/">Your browser is quite old!</strong> Why not upgrade to a different browser to better enjoy this site?</a></div><![endif]-->
+<nav id="dl-menu" class="dl-menuwrapper" role="navigation">
+	<button class="dl-trigger">Open Menu</button>
+	<ul class="dl-menu">
+		<li><a href="/">Home</a></li>
+		<li>
+			<a href="#">About</a>
+			<ul class="dl-submenu">
+				<li>
+					<img src="/images/avatar.jpg" alt="Ronald Liu photo" class="author-photo">
+					<h4>Ronald Liu</h4>
+					<p>INTP型摄影师 会帆板的吉他手 有腹肌的程序员</p>
+				</li>
+				<li><a href="/about/"><span class="btn btn-inverse">Learn More</span></a></li>
+				<li>
+					<a href="mailto:lzsdc@live.com"><i class="fa fa-fw fa-envelope"></i> Email</a>
+				</li>
+				
+				
+				
+				<li>
+					<a href="https://linkedin.com/in/http://www.linkedin.com/in/cnronald"><i class="fa fa-fw fa-linkedin"></i> LinkedIn</a>
+				</li>
+				
+				
+				
+				<li>
+					<a href="https://www.flickr.com/photos/https://www.flickr.com/photos/thinkingcentre/"><i class="fa fa-fw fa-flickr"></i> Flickr</a>
+				</li>
+				
+			</ul><!-- /.dl-submenu -->
+		</li>
+		<li>
+			<a href="#">Posts</a>
+			<ul class="dl-submenu">
+				<li><a href="/posts/">All Posts</a></li>
+				<li><a href="/tags/">All Tags</a></li>
+			</ul>
+		</li>
+		
+	</ul><!-- /.dl-menu -->
+</nav><!-- /.dl-menuwrapper -->
+
+
+
+
+<div id="main" role="main">
+  <article class="hentry">
+    <header class="header-title">
+      <div class="header-title-wrap">
+        
+          <h1 class="entry-title"><a href="/2011/120/stdcallcdecl.html" rel="bookmark" title="stdcall和cdecl详解">stdcall和cdecl详解</a></h1>
+        
+        <h2><span class="entry-date date published"><time datetime="2011-04-30T00:00:00+08:00">April 30, 2011</time></span></h2>
+        
+        <p class="entry-reading-time">
+          <i class="fa fa-clock-o"></i>
+          
+Reading time ~1 minute
+        </p><!-- /.entry-reading-time -->
+        
+      </div><!-- /.header-title-wrap -->
+    </header>
+    <div class="entry-content">
+      <p>前些天搞dr.com的破解时有很多收获，一直想总结一下，以后也许有用，今天开个头，以后有时间再慢慢整理。</p>
+
+<p>写过dll的同学都知道stdcall 函数和一般的C函数是不一样的。最直观的不同就是在声明时stdcall函数要加上宏WINAPI。研究过导出表的同学可能会对这个问题有更深入的理解，因为当你输出一个C函数时，通常会加上特定的名字修饰。比如_foo@4（这个修饰方式和编译器实现相关）。你必须强制使用正确的函数名以防止LoadLibrary函数无法访问你的C函数。<br />
+那么究竟什么是stdcall，为什么有stdcall和cdecl的区别，为什么cdecl（也就是一般的C函数）要加上如此奇怪的名字装饰呢。本文将从编译和执行的角度解释以上问题。阅读本文你需要一定的汇编基础。不太明白的同学请参看有关资料。<br />
+一下叙述默认使用IA32结构。汇编代码会使用AT&amp;T风格描述。如果你熟悉Intel风格，其实你要做的只是去掉每个指令的修饰后缀（如movl 中的l），它代表操作数的大小，l表示long，也就是4Byte。另外你需要忽略寄存器前的%和立即数前的$。</p>
+
+<h1 id="section">过程（函数）调用的一般步骤</h1>
+
+<p>如果你不是使用不靠谱的国内汇编教材，你都会在学习汇编语言或计算机组成原理时了解过程调用的一般步骤。如果你已经熟悉过程调用的步骤，你可以直接跳到下一节。<br />
+就像没有灯光的时候，你女伴的长相不是需要关注的第一问题一样。在较底层的空间里徘徊时，我们通常不需要区别函数和过程。因为函数只不过是有返回值的过程，而在机器层面，返回不过是把需要返回的值赋给指定的寄存器而已。<br />
+典型的过程调用有以下几个步骤。</p>
+
+<ul>
+  <li>将参数放到指定的区域，对于我们今天讨论的问题，这一步骤相当于以指定方式将参数压栈。而对于fastcall，参数是通过寄存器传递的。这也解释了它名字的来历。</li>
+  <li>将记录当前程序运行位置的寄存器值（IA32中为EIP）压栈。跳转到被调用过程所在的内存区域。IA32提供call指令完成上述过程。虽说call看起来只有一个指令，可是它处理的问题有很多。首先，它会将%EIP压栈，这是用来返回的，因为当被调过程完成时需要知道如何回到主调过程。然后他会执行一个类似于jmp的指令跳转到指定程序的位置。<br />
+现在出现的一个问题是，当被调用过程开始执行时，栈顶指针和栈基址貌似与正常不符，一般情况下，一个过程应该能确定启动时自己的栈基址和栈顶指针相同。而对于被调用过程，这一假设通常由于局部变量的使用（他们位于栈中）而不成立。因此，一个过程开始时，会把栈基址压栈，然后将栈基址设为当前的栈顶指针。这就是为什么每个过程前面有类似pushl %ebp和mov %esp, %ebp</li>
+  <li>在返回之前，你需要处理一些善后的事宜，包括恢复系统栈的栈基址和栈顶指针。你可以使用leave指令来完成恢复栈基址的工作。</li>
+  <li>当过程完成时，从栈里弹出主调用过程停止处的地址。并跳转过去，使得主调用过程继续进行。IA32提供ret完成上述过程。有时你可以使用retn n来执行上述步骤，后面跟的n是在返回之后esp将会增加的值。</li>
+</ul>
+
+<h1 id="section-1">关键问题：谁来善后栈顶指针</h1>
+<p>刚才说过leave指针可以用来恢复栈基址。它的工作方式是先将栈顶指针设为栈基址，这里如前面所说，保存着主调进程的栈基址。然后将这个栈基址弹出，这时栈顶指针会指向返回地址，而栈基址会恢复到主调进程调用之前的位置。<br />
+好吧，如果你晕了，那你可能需要找一个汇编的书研究一下，而且这与我们所讨论的问题没什么关系。<br />
+那么，如何恢复栈顶指针呢？<br />
+栈顶指针之所以会改变，是由于在调用被调过程之前主调过程会通过压栈来传递参数（在被调过程中对于栈的改变，哪怕是调用另外一个过程，都会由于leave的调用而恢复）。那么如何将这些参数清空就是我们需要考虑的问题了。这也正是stdcall和cdecl的区别。<br />
+一个典型的stdcall过程调用汇编代码如下所示：<br />
+主调用过程 :</p>
+
+<div class="language-c highlighter-rouge"><pre class="highlight"><code><span class="n">pushl</span> <span class="p">(</span><span class="n">arg1</span><span class="p">)</span> <span class="p">;</span><span class="n">Step</span> <span class="mi">1</span>  
+<span class="n">pushl</span> <span class="p">(</span><span class="n">arg2</span><span class="p">)</span>   
+  
+<span class="n">call</span> <span class="n">foo</span> <span class="p">;</span> <span class="n">Step</span> <span class="mi">2</span>  
+
+</code></pre>
+</div>
+
+<p>被调用过程:</p>
+
+<div class="language-c highlighter-rouge"><pre class="highlight"><code><span class="n">pushl</span> <span class="o">%</span><span class="n">ebp</span>  
+<span class="n">movl</span> <span class="o">%</span><span class="n">esp</span><span class="p">,</span> <span class="o">%</span><span class="n">ebp</span>  
+
+<span class="err">…</span> <span class="p">;</span><span class="n">Here</span><span class="err">'</span><span class="n">s</span> <span class="n">the</span> <span class="n">body</span> <span class="n">of</span> <span class="n">procedure</span>  
+
+<span class="n">leave</span>  <span class="p">;</span><span class="n">Step</span> <span class="mi">3</span>  
+<span class="n">retn</span> <span class="mi">8</span> <span class="p">;</span><span class="n">Step</span> <span class="mi">3</span> <span class="n">and</span> <span class="mi">4</span><span class="p">.</span> <span class="n">Here</span> <span class="mi">8</span> <span class="n">is</span> <span class="n">the</span> <span class="n">size</span> <span class="n">of</span> <span class="n">arguments</span> <span class="n">in</span> <span class="n">Byte</span><span class="p">.</span>  
+</code></pre>
+</div>
+
+<p>刚才说过retn会才执行完成之后（也就是执行主调过程中call之后那个指令之前），对%esp进行减运算。减数就是它的参数。 
+嗯，大家应该明白了， stdcall中被调用过程将会自己处理%esp的善后问题。那么，这就很容易理解为什么大家都说stdcall不能传递可变长度的参数了。因为只有主调过程知道到底push了多少参数到栈里，所以被调函数无法进行清理操作。 
+那cdecl是什么各位应该明白了。是的，是在主调过程中恢复%esp。我们来看一下。</p>
+
+<p>主调用过程：</p>
+
+<div class="language-c highlighter-rouge"><pre class="highlight"><code><span class="n">pushl</span> <span class="p">(</span><span class="n">arg2</span><span class="p">)</span> <span class="p">;</span><span class="n">Step</span> <span class="mi">1</span>  
+<span class="n">pushl</span> <span class="p">(</span><span class="n">arg1</span><span class="p">)</span>   
+
+<span class="n">call</span> <span class="n">bar</span> <span class="p">;</span> <span class="n">Step</span> <span class="mi">2</span>  
+<span class="n">addl</span> <span class="o">%</span><span class="n">esp</span><span class="p">,</span> <span class="mi">8</span>  
+</code></pre>
+</div>
+
+<p>被调用过程:
+```c
+pushl %ebp<br />
+movl %esp, %ebp</p>
+
+<p>… ;Here’s the body of procedure</p>
+
+<p>leave  ;Step 3<br />
+ret	   ;Step 4<br />
+```</p>
+
+<p>看出来了，主调过程自己处理了参数所占的栈空间。细心的同学可能会发现参数是以倒序压入的。很多人说为什么要后面的参数的先push。这个问题我们可以这样看。<br />
+学过C语言的知道，函数一般用第一个参数指明究竟有多少参数被传递。比如main中的argc，printf中的format字符串等。因此第一个参数的地址必须容易确定。当参数全部push完成后，离被调函数的栈基址最近的应该是最后一个被push的参数。那么如果使用倒序的push顺序。第一个参数的位置很简单的可以确定为%ebp-4（有一个%eip也被压栈了，记得么）。这是的被调函数更容易编写。</p>
+
+<h1 id="section-2">关于修饰符</h1>
+<p>最开始我们讲到，用C没有加stdcall修饰时导出的函数名会被修饰。如void foo(int arg1, int arg2)会被修饰为_foo@8，现在我们知道了。因为 stdcall有一个固定的参数列表，如果参数数量不一样会造成参数的错传（cdecl因为是倒序输入，即使参数数量过多，只要顺序正确就不会有问题），所以当C函数 被导出成stdcall时会明确的加上指明参数大小的修饰符。因此@8就是说foo函数的参数共占了 8个字节。</p>
+
+      <footer class="entry-meta">
+        <span class="entry-tags"><a href="/tags/#C/C++" title="Pages tagged C/C++" class="tag"><span class="term">C/C++</span></a></span>
+        
+        <div class="social-share">
+  <ul class="socialcount socialcount-small inline-list">
+    <li class="facebook"><a href="https://www.facebook.com/sharer/sharer.php?u=/2011/120/stdcallcdecl.html" title="Share on Facebook"><span class="count"><i class="fa fa-facebook-square"></i> Like</span></a></li>
+    <li class="twitter"><a href="https://twitter.com/intent/tweet?text=/2011/120/stdcallcdecl.html" title="Share on Twitter"><span class="count"><i class="fa fa-twitter-square"></i> Tweet</span></a></li>
+    <li class="googleplus"><a href="https://plus.google.com/share?url=/2011/120/stdcallcdecl.html" title="Share on Google Plus"><span class="count"><i class="fa fa-google-plus-square"></i> +1</span></a></li>
+  </ul>
+</div><!-- /.social-share -->
+      </footer>
+    </div><!-- /.entry-content -->
+    <section id="disqus_thread"></section><!-- /#disqus_thread -->
+    <div class="read-more">
+  
+    <div class="read-more-header">
+      <a href="/2011/087/fvckdrcom.html" class="read-more-btn">Read More</a>
+    </div><!-- /.read-more-header -->
+    <div class="read-more-content">
+      <h3><a href="/2013/315/vs2013-boost.html" title="在Visual Studio 2013上编译boost 1.55">在Visual Studio 2013上编译boost 1.55</a></h3>
+      <p>在Visual Studio 2013(msvc12)上编译boost 1.55确实不是很容易。网上的教程大多过于陈旧，还有几个与VS不兼容的问题还没有修复。这篇文章总结了如何编译安装boost 1.55 beta 1、修复一些小Bug。其中某些不兼容问题在1.54版本中依然存在，同样可以用本文中的方法解决。 <a href="/2013/315/vs2013-boost.html">Continue reading</a></p>
+    </div><!-- /.read-more-content -->
+  
+  <div class="read-more-list">
+    
+      <div class="list-item">
+        <h4><a href="/2013/004/2013newyear.html" title="中国梦 宪政梦">中国梦 宪政梦</a></h4>
+        <span>Published on January 04, 2013</span>
+      </div><!-- /.list-item -->
+    
+      <div class="list-item">
+        <h4><a href="/2012/360/tcpdnsdns.html" title="使用基于TCP的DNS解析服务防止DNS污染">使用基于TCP的DNS解析服务防止DNS污染</a></h4>
+        <span>Published on December 25, 2012</span>
+      </div><!-- /.list-item -->
+    
+  </div><!-- /.read-more-list -->
+</div><!-- /.read-more -->
+  </article>
+</div><!-- /#main -->
+
+<div class="footer-wrapper">
+  <footer role="contentinfo">
+    <span>&copy; 2016 Ronald Liu. Powered by <a href="http://jekyllrb.com" rel="nofollow">Jekyll</a> using the <a href="https://mademistakes.com/work/hpstr-jekyll-theme/" rel="nofollow">HPSTR Theme</a>.</span>
+  </footer>
+</div><!-- /.footer-wrapper -->
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src="/assets/js/vendor/jquery-1.9.1.min.js"><\/script>')</script>
+<script src="/assets/js/scripts.min.js"></script>
+
+
+<!-- Asynchronous Google Analytics snippet -->
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-17561731-3', 'auto');  
+  ga('require', 'linkid', 'linkid.js');
+  ga('send', 'pageview');
+</script>
+
+
+
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'ronaldliusblog'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function () {
+            var s = document.createElement('script'); s.async = true;
+            s.type = 'text/javascript';
+            s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+            (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+        }());
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+	        
+
+</body>
+</html>

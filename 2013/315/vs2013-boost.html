@@ -1,0 +1,287 @@
+<!doctype html>
+<!--[if lt IE 7]><html class="no-js lt-ie9 lt-ie8 lt-ie7" lang="en"> <![endif]-->
+<!--[if (IE 7)&!(IEMobile)]><html class="no-js lt-ie9 lt-ie8" lang="en"><![endif]-->
+<!--[if (IE 8)&!(IEMobile)]><html class="no-js lt-ie9" lang="en"><![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en"><!--<![endif]-->
+<head>
+<meta charset="utf-8">
+<title>在Visual Studio 2013上编译boost 1.55 &#8211; Ronald的部落格</title>
+<meta name="description" content="在Visual Studio 2013(msvc12)上编译boost 1.55确实不是很容易。网上的教程大多过于陈旧，还有几个与VS不兼容的问题还没有修复。这篇文章总结了如何编译安装boost 1.55 beta 1、修复一些小Bug。其中某些不兼容问题在1.54版本中依然存在，同样可以用本文中的方法解决。">
+<meta name="keywords" content="Visual Studio, boost, C/C++">
+
+
+
+<!-- Open Graph -->
+<meta property="og:locale" content="en_US">
+<meta property="og:type" content="article">
+<meta property="og:title" content="在Visual Studio 2013上编译boost 1.55">
+<meta property="og:description" content="在Visual Studio 2013(msvc12)上编译boost 1.55确实不是很容易。网上的教程大多过于陈旧，还有几个与VS不兼容的问题还没有修复。这篇文章总结了如何编译安装boost 1.55 beta 1、修复一些小Bug。其中某些不兼容问题在1.54版本中依然存在，同样可以用本文中的方法解决。">
+<meta property="og:url" content="/2013/315/vs2013-boost.html">
+<meta property="og:site_name" content="Ronald的部落格">
+
+
+
+
+
+<link rel="canonical" href="/2013/315/vs2013-boost.html">
+<link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Ronald的部落格 Feed">
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<!-- Webfonts -->
+<link href="//fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic" rel="stylesheet" type="text/css">
+
+<meta http-equiv="cleartype" content="on">
+
+<!-- Load Modernizr -->
+<script src="/assets/js/vendor/modernizr-2.6.2.custom.min.js"></script>
+
+<!-- Icons -->
+<!-- 16x16 -->
+<link rel="shortcut icon" href="/favicon.ico">
+<!-- 32x32 -->
+<link rel="shortcut icon" href="/favicon.png">
+<!-- 57x57 (precomposed) for iPhone 3GS, pre-2011 iPod Touch and older Android devices -->
+<link rel="apple-touch-icon-precomposed" href="/images/apple-touch-icon-precomposed.png">
+<!-- 72x72 (precomposed) for 1st generation iPad, iPad 2 and iPad mini -->
+<link rel="apple-touch-icon-precomposed" sizes="72x72" href="/images/apple-touch-icon-72x72-precomposed.png">
+<!-- 114x114 (precomposed) for iPhone 4, 4S, 5 and post-2011 iPod Touch -->
+<link rel="apple-touch-icon-precomposed" sizes="114x114" href="/images/apple-touch-icon-114x114-precomposed.png">
+<!-- 144x144 (precomposed) for iPad 3rd and 4th generation -->
+<link rel="apple-touch-icon-precomposed" sizes="144x144" href="/images/apple-touch-icon-144x144-precomposed.png">
+
+
+
+</head>
+
+<body id="post" >
+
+<!--[if lt IE 9]><div class="upgrade"><strong><a href="http://whatbrowser.org/">Your browser is quite old!</strong> Why not upgrade to a different browser to better enjoy this site?</a></div><![endif]-->
+<nav id="dl-menu" class="dl-menuwrapper" role="navigation">
+	<button class="dl-trigger">Open Menu</button>
+	<ul class="dl-menu">
+		<li><a href="/">Home</a></li>
+		<li>
+			<a href="#">About</a>
+			<ul class="dl-submenu">
+				<li>
+					<img src="/images/avatar.jpg" alt="Ronald Liu photo" class="author-photo">
+					<h4>Ronald Liu</h4>
+					<p>INTP型摄影师 会帆板的吉他手 有腹肌的程序员</p>
+				</li>
+				<li><a href="/about/"><span class="btn btn-inverse">Learn More</span></a></li>
+				<li>
+					<a href="mailto:lzsdc@live.com"><i class="fa fa-fw fa-envelope"></i> Email</a>
+				</li>
+				
+				
+				
+				<li>
+					<a href="https://linkedin.com/in/http://www.linkedin.com/in/cnronald"><i class="fa fa-fw fa-linkedin"></i> LinkedIn</a>
+				</li>
+				
+				
+				
+				<li>
+					<a href="https://www.flickr.com/photos/https://www.flickr.com/photos/thinkingcentre/"><i class="fa fa-fw fa-flickr"></i> Flickr</a>
+				</li>
+				
+			</ul><!-- /.dl-submenu -->
+		</li>
+		<li>
+			<a href="#">Posts</a>
+			<ul class="dl-submenu">
+				<li><a href="/posts/">All Posts</a></li>
+				<li><a href="/tags/">All Tags</a></li>
+			</ul>
+		</li>
+		
+	</ul><!-- /.dl-menu -->
+</nav><!-- /.dl-menuwrapper -->
+
+
+
+
+<div id="main" role="main">
+  <article class="hentry">
+    <header class="header-title">
+      <div class="header-title-wrap">
+        
+          <h1 class="entry-title"><a href="/2013/315/vs2013-boost.html" rel="bookmark" title="在Visual Studio 2013上编译boost 1.55">在Visual Studio 2013上编译boost 1.55</a></h1>
+        
+        <h2><span class="entry-date date published"><time datetime="2013-11-11T00:00:00+08:00">November 11, 2013</time></span></h2>
+        
+        <p class="entry-reading-time">
+          <i class="fa fa-clock-o"></i>
+          
+Reading time ~1 minute
+        </p><!-- /.entry-reading-time -->
+        
+      </div><!-- /.header-title-wrap -->
+    </header>
+    <div class="entry-content">
+      <p>在Visual Studio 2013(msvc12)上编译boost 1.55确实不是很容易。网上的教程大多过于陈旧，还有几个与VS不兼容的问题还没有修复。这篇文章总结了如何编译安装64位版本的boost 1.55 beta 1、修复一些小Bug，以及如何设置Visual Studio进行boost开发。其中某些不兼容问题在1.54版本中依然存在，同样可以用本文中的方法解决。</p>
+
+<h1 id="boost">下载boost</h1>
+
+<p>下载地址在<a href="http://sourceforge.net/projects/boost/files/boost/1.55.0.beta.1/">这里</a>
+下载7z比较小，实测在Windows上使用完全没有问题。另外需要注意的是，某些编译程序对中文的支持不完全，解压路径里不要含有中文。</p>
+
+<h1 id="section">生成编译工具</h1>
+<p>其实也不能算是编译工具啦，只是一个静态版的Makefile。
+首先打开命令提示符，需要注意的是，如果boost解压在系统目录（如Program Files目录），打开命令提示符必须选择以管理员身份打开。比较简单的方法是按Win+x键。在弹出的菜单里选“命令提示符（管理员）”。
+然后，切换到boost解压到的目录。输入命令bootstrap.bat回车。大概一两分钟的样子就可以生成出b2和bjam两个可执行文件。</p>
+
+<h2 id="section-1">一点修改</h2>
+<p>在我的编译过程中出现了一下几个错误，各位可以在编译之前先修改源代码，避免走弯路。两个Bug的ticket在<a href="https://svn.boost.org/trac/boost/ticket/9196&gt;">这里</a>和<a href="https://svn.boost.org/trac/boost/ticket/9205">这里</a>。
+简单来说，需要修改的文件包括boost/mpl/assert.hpp和boost/archive/iterators/transform_width.hpp。其中
+boost/mpl/assert.hpp, line 137:</p>
+
+<div class="language-cpp highlighter-rouge"><pre class="highlight"><code><span class="cp">#if BOOST_WORKAROUND(BOOST_MSVC, &gt;= 1700)
+</span></code></pre>
+</div>
+
+<p>改为</p>
+
+<div class="language-cpp highlighter-rouge"><pre class="highlight"><code><span class="cp">#if BOOST_WORKAROUND(BOOST_MSVC, == 1700)
+</span></code></pre>
+</div>
+
+<p>boost/archive/iterators/transform_width.hpp 最开始增加</p>
+
+<div class="language-cpp highlighter-rouge"><pre class="highlight"><code><span class="cp">#include&lt;algorithm&gt;
+</span></code></pre>
+</div>
+
+<h2 id="boost-1">开始编译boost</h2>
+<p>用下面的命令开始编译boost</p>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>b2 -j4
+</code></pre>
+</div>
+
+<p>j4命令可以打开4线程并行编译（跟make一样~）。
+根据自己的应用特点可以编译特定的变种。比如如果只需要编译64位版本，就需要在参数中增加address-model=64。根据我自己的需要，我选择了只编译64位release库，4进程并行编译。具体命令是</p>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>b2 -q address-model<span class="o">=</span>64 <span class="nv">toolset</span><span class="o">=</span>msvc <span class="nv">variant</span><span class="o">=</span>release -j4
+</code></pre>
+</div>
+
+<p>其中-q表示如果出现错误立即停止，这样有利于提早发现并解决boost中的Bug。
+编译，根据计算机的速度，可能会消耗10-40分钟不等的时间。</p>
+
+<h1 id="visual-studiovc">设置Visual Studio(VC)项目</h1>
+<p>打开需要使用Boost的项目，选择项目-&gt;XX(你的项目名)属性，在平台中选择正确的平台(如果是64位系统需要选择x64)，选择正确的配置(如果使用release版本的库则选择Release)。在左侧的树状图中选择配置属性-&gt;VC++目录。添加包含目录和库目录。假设boost解压完成的根目录为%boostRoot%（在我这里是D:\Program Files\boost\boost_1_55_0b1），则包含目录应该添加%boostRoot%，而库目录应该添加%boostRoot%\stage\lib。
+完成设置后可以用以下程序来测试设置是否正确</p>
+
+<pre><code class="language-C++">#include &lt;boost/thread/thread.hpp&gt;
+#include &lt;iostream&gt;
+
+void hello()
+{
+    std::cout &lt;&lt;"Hello world, I'm a thread!" &lt;&lt; std::endl;
+}
+
+int main(int argc, char* argv[])
+{
+    boost::thread thrd(&amp;hello);
+    thrd.join();
+    return 0;
+}
+</code></pre>
+
+      <footer class="entry-meta">
+        <span class="entry-tags"><a href="/tags/#Visual Studio" title="Pages tagged Visual Studio" class="tag"><span class="term">Visual Studio</span></a><a href="/tags/#boost" title="Pages tagged boost" class="tag"><span class="term">boost</span></a><a href="/tags/#C/C++" title="Pages tagged C/C++" class="tag"><span class="term">C/C++</span></a></span>
+        
+        <div class="social-share">
+  <ul class="socialcount socialcount-small inline-list">
+    <li class="facebook"><a href="https://www.facebook.com/sharer/sharer.php?u=/2013/315/vs2013-boost.html" title="Share on Facebook"><span class="count"><i class="fa fa-facebook-square"></i> Like</span></a></li>
+    <li class="twitter"><a href="https://twitter.com/intent/tweet?text=/2013/315/vs2013-boost.html" title="Share on Twitter"><span class="count"><i class="fa fa-twitter-square"></i> Tweet</span></a></li>
+    <li class="googleplus"><a href="https://plus.google.com/share?url=/2013/315/vs2013-boost.html" title="Share on Google Plus"><span class="count"><i class="fa fa-google-plus-square"></i> +1</span></a></li>
+  </ul>
+</div><!-- /.social-share -->
+      </footer>
+    </div><!-- /.entry-content -->
+    <section id="disqus_thread"></section><!-- /#disqus_thread -->
+    <div class="read-more">
+  
+    <div class="read-more-header">
+      <a href="/2013/004/2013newyear.html" class="read-more-btn">Read More</a>
+    </div><!-- /.read-more-header -->
+    <div class="read-more-content">
+      <h3><a href="/2013/004/2013newyear.html" title="中国梦 宪政梦">中国梦 宪政梦</a></h3>
+      <p>南方周末2013年新年献辞，转载防河蟹天地之间，时间绽放。 这是我们在2013年的第一次相见，愿你被梦想点亮。 2012年，你守护自己的生活，他们守护自己的工作。守护这份工作，就是在守护他们对生活的梦想。 2012年，庙堂之上发出的宪政强音嗡然回响：“宪法的生命在于实施，宪...&hellip; <a href="/2013/004/2013newyear.html">Continue reading</a></p>
+    </div><!-- /.read-more-content -->
+  
+  <div class="read-more-list">
+    
+      <div class="list-item">
+        <h4><a href="/2012/360/tcpdnsdns.html" title="使用基于TCP的DNS解析服务防止DNS污染">使用基于TCP的DNS解析服务防止DNS污染</a></h4>
+        <span>Published on December 25, 2012</span>
+      </div><!-- /.list-item -->
+    
+      <div class="list-item">
+        <h4><a href="/2012/360/how-tolinux.html" title="在Linux下设置无线网络桥接">在Linux下设置无线网络桥接</a></h4>
+        <span>Published on December 25, 2012</span>
+      </div><!-- /.list-item -->
+    
+  </div><!-- /.read-more-list -->
+</div><!-- /.read-more -->
+  </article>
+</div><!-- /#main -->
+
+<div class="footer-wrapper">
+  <footer role="contentinfo">
+    <span>&copy; 2016 Ronald Liu. Powered by <a href="http://jekyllrb.com" rel="nofollow">Jekyll</a> using the <a href="https://mademistakes.com/work/hpstr-jekyll-theme/" rel="nofollow">HPSTR Theme</a>.</span>
+  </footer>
+</div><!-- /.footer-wrapper -->
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src="/assets/js/vendor/jquery-1.9.1.min.js"><\/script>')</script>
+<script src="/assets/js/scripts.min.js"></script>
+
+
+<!-- Asynchronous Google Analytics snippet -->
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-17561731-3', 'auto');  
+  ga('require', 'linkid', 'linkid.js');
+  ga('send', 'pageview');
+</script>
+
+
+
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'ronaldliusblog'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function () {
+            var s = document.createElement('script'); s.async = true;
+            s.type = 'text/javascript';
+            s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+            (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+        }());
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+	        
+
+</body>
+</html>
