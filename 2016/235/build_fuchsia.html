@@ -205,9 +205,9 @@ curl -s https://raw.githubusercontent.com/vanadium/go.jiri/master/scripts/bootst
 </code></pre>
 </div>
 
-<p>命令会返回一个需要加入PATH的路径，然后我们手动加入进来</p>
+<p>命令会返回一个需要加入PATH的路径，然后我们手动加入进来。</p>
 
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="nb">export </span><span class="nv">PATH</span><span class="o">=</span>/Users/ronald/fuchsia/.jiri_root/scripts:<span class="nv">$PATH</span>
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="nb">export </span><span class="nv">PATH</span><span class="o">=</span>&lt;刚才的路径&gt;:<span class="nv">$PATH</span>
 </code></pre>
 </div>
 
@@ -230,7 +230,7 @@ jiri update
 <h1 id="section-4">启动</h1>
 <p>重新回到刚才Magenta所在的目录，然后执行命令</p>
 
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code>./scripts/run-magenta-x86-64 -x <span class="nv">$PATH</span>/fuchsia/out/debug-x86-64/user.bootfs
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>./scripts/run-magenta-x86-64 -x <span class="nv">$SRC</span>/fuchsia/out/debug-x86-64/user.bootfs
 </code></pre>
 </div>
 

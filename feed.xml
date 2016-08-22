@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom"><generator uri="http://jekyllrb.com" version="3.1.6">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2016-08-22T21:31:51+08:00</updated><id>/</id><title>Ronald的部落格</title><subtitle>一个人的博物馆</subtitle><entry><title>构建Fuchsia</title><link href="/2016/235/build_fuchsia.html" rel="alternate" type="text/html" title="构建Fuchsia" /><published>2016-08-22T00:00:00+08:00</published><updated>2016-08-22T00:00:00+08:00</updated><id>/2016/235/build_fuchsia</id><content type="html" xml:base="/2016/235/build_fuchsia.html">&lt;p&gt;对Fuchsia很感兴趣，今天编译一下，编译的过程记录在此。之后可能会玩一玩。我使用的环境是Mac OS X 10.11，编译目标为x86_64。如果你也有兴趣，可以参照本文，也可以看一下官方编译的步骤文章&lt;a href=&quot;https://fuchsia.googlesource.com/magenta/+/HEAD/docs/getting_started.md&quot;&gt;Quick Start Recipes&lt;/a&gt;和&lt;a href=&quot;https://fuchsia.googlesource.com/manifest/+/master/README.md&quot;&gt;Fuchsia Manifest&lt;/a&gt;&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom"><generator uri="http://jekyllrb.com" version="3.1.6">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2016-08-22T21:40:14+08:00</updated><id>/</id><title>Ronald的部落格</title><subtitle>一个人的博物馆</subtitle><entry><title>构建Fuchsia</title><link href="/2016/235/build_fuchsia.html" rel="alternate" type="text/html" title="构建Fuchsia" /><published>2016-08-22T00:00:00+08:00</published><updated>2016-08-22T00:00:00+08:00</updated><id>/2016/235/build_fuchsia</id><content type="html" xml:base="/2016/235/build_fuchsia.html">&lt;p&gt;对Fuchsia很感兴趣，今天编译一下，编译的过程记录在此。之后可能会玩一玩。我使用的环境是Mac OS X 10.11，编译目标为x86_64。如果你也有兴趣，可以参照本文，也可以看一下官方编译的步骤文章&lt;a href=&quot;https://fuchsia.googlesource.com/magenta/+/HEAD/docs/getting_started.md&quot;&gt;Quick Start Recipes&lt;/a&gt;和&lt;a href=&quot;https://fuchsia.googlesource.com/manifest/+/master/README.md&quot;&gt;Fuchsia Manifest&lt;/a&gt;&lt;/p&gt;
 
 &lt;h1 id=&quot;section&quot;&gt;准备工作&lt;/h1&gt;
 &lt;p&gt;需要的东西主要有: Golang, git以及常见的工具链(bin-util make glibc之类)
@@ -77,9 +77,9 @@ curl -s https://raw.githubusercontent.com/vanadium/go.jiri/master/scripts/bootst
 &lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 
-&lt;p&gt;命令会返回一个需要加入PATH的路径，然后我们手动加入进来&lt;/p&gt;
+&lt;p&gt;命令会返回一个需要加入PATH的路径，然后我们手动加入进来。&lt;/p&gt;
 
-&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;export &lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;PATH&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;/Users/ronald/fuchsia/.jiri_root/scripts:&lt;span class=&quot;nv&quot;&gt;$PATH&lt;/span&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;export &lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;PATH&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&amp;lt;刚才的路径&amp;gt;:&lt;span class=&quot;nv&quot;&gt;$PATH&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 
@@ -102,7 +102,7 @@ jiri update
 &lt;h1 id=&quot;section-4&quot;&gt;启动&lt;/h1&gt;
 &lt;p&gt;重新回到刚才Magenta所在的目录，然后执行命令&lt;/p&gt;
 
-&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;./scripts/run-magenta-x86-64 -x &lt;span class=&quot;nv&quot;&gt;$PATH&lt;/span&gt;/fuchsia/out/debug-x86-64/user.bootfs
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;./scripts/run-magenta-x86-64 -x &lt;span class=&quot;nv&quot;&gt;$SRC&lt;/span&gt;/fuchsia/out/debug-x86-64/user.bootfs
 &lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 
