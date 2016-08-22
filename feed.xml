@@ -1,7 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom"><generator uri="http://jekyllrb.com" version="3.1.6">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2016-08-22T21:45:39+08:00</updated><id>/</id><title>Ronald的部落格</title><subtitle>一个人的博物馆</subtitle><entry><title>构建Fuchsia</title><link href="/2016/235/build_fuchsia.html" rel="alternate" type="text/html" title="构建Fuchsia" /><published>2016-08-22T00:00:00+08:00</published><updated>2016-08-22T00:00:00+08:00</updated><id>/2016/235/build_fuchsia</id><content type="html" xml:base="/2016/235/build_fuchsia.html">&lt;p&gt;对Fuchsia很感兴趣，今天编译一下，编译的过程记录在此。之后可能会玩一玩。我使用的环境是Mac OS X 10.11，编译目标为x86_64。如果你也有兴趣，可以参照本文，也可以看一下官方编译的步骤文章&lt;a href=&quot;https://fuchsia.googlesource.com/magenta/+/HEAD/docs/getting_started.md&quot;&gt;Quick Start Recipes&lt;/a&gt;和&lt;a href=&quot;https://fuchsia.googlesource.com/manifest/+/master/README.md&quot;&gt;Fuchsia Manifest&lt;/a&gt;&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom"><generator uri="http://jekyllrb.com" version="3.1.6">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2016-08-22T22:17:58+08:00</updated><id>/</id><title>Ronald的部落格</title><subtitle>一个人的博物馆</subtitle><entry><title>构建Fuchsia</title><link href="/2016/235/build_fuchsia.html" rel="alternate" type="text/html" title="构建Fuchsia" /><published>2016-08-22T00:00:00+08:00</published><updated>2016-08-22T00:00:00+08:00</updated><id>/2016/235/build_fuchsia</id><content type="html" xml:base="/2016/235/build_fuchsia.html">&lt;p&gt;对Fuchsia很感兴趣，今天编译一下，编译的过程记录在此。之后可能会玩一玩。&lt;/p&gt;
+
+&lt;p&gt;我使用的环境是Mac OS X 10.11，编译目标为x86_64。如果你也有兴趣，可以参照本文，也可以看一下官方的说明文档&lt;a href=&quot;https://fuchsia.googlesource.com/magenta/+/HEAD/docs/getting_started.md&quot;&gt;Quick Start Recipes&lt;/a&gt;和&lt;a href=&quot;https://fuchsia.googlesource.com/manifest/+/master/README.md&quot;&gt;Fuchsia Manifest&lt;/a&gt;&lt;/p&gt;
 
 &lt;h1 id=&quot;section&quot;&gt;准备工作&lt;/h1&gt;
-&lt;p&gt;需要的东西主要有: Golang, git以及常见的工具链(bin-util make glibc之类)
+&lt;p&gt;需要的东西主要有: Golang, git以及常见的工具链(bin-util make glibc之类)&lt;br /&gt;
 其中Golang和git可以在官网下载对应的安装包安装。工具链可以使用如下命令安装&lt;/p&gt;
 
 &lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;brew install wget pkg-config glib autoconf automake libtool
@@ -14,10 +16,11 @@
 &lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 
-&lt;p&gt;PS：由于大多数代码都托管在已被封锁的Google上，如果身在国内你就需要一个VPN来完成代码的下载步骤。
-# 构建Magenta内核&lt;/p&gt;
+&lt;p&gt;PS：由于大多数代码都托管在已被封锁的Google上，如果身在国内你就需要一个VPN来完成代码的下载步骤。&lt;/p&gt;
 
-&lt;h2 id=&quot;magenta&quot;&gt;下载magenta&lt;/h2&gt;
+&lt;h1 id=&quot;magenta&quot;&gt;构建Magenta内核&lt;/h1&gt;
+
+&lt;h2 id=&quot;magenta-1&quot;&gt;下载magenta&lt;/h2&gt;
 &lt;p&gt;从代码库克隆内核代码&lt;/p&gt;
 
 &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$ git clone https://fuchsia.googlesource.com/magenta $SRC/magenta
@@ -43,7 +46,7 @@ sudo make install
 &lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 
-&lt;h2 id=&quot;magenta-1&quot;&gt;编译Magenta&lt;/h2&gt;
+&lt;h2 id=&quot;magenta-2&quot;&gt;编译Magenta&lt;/h2&gt;
 &lt;p&gt;先将工具链加入搜索路径&lt;/p&gt;
 
 &lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;export &lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;PATH&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$PATH&lt;/span&gt;:&lt;span class=&quot;nv&quot;&gt;$SRC&lt;/span&gt;/toolchains/x86_64-elf-5.3.0-Darwin-x86_64/bin
@@ -123,7 +126,7 @@ with mine.&lt;/p&gt;
 
 &lt;p&gt;LOL&lt;/p&gt;
 
-&lt;p&gt;今天先说到这里，之后会详细的谈谈开发环境的部署。&lt;/p&gt;</content><category term="Fuchsia" /><summary>对Fuchsia很感兴趣，今天编译一下，编译的过程记录在此。之后可能会玩一玩。我使用的环境是Mac OS X 10.11，编译目标为x86_64。如果你也有兴趣，可以参照本文，也可以看一下官方编译的步骤文章Quick Start Recipes和Fuchsia Manifest</summary></entry><entry><title>（重新）迁移到Jekyll</title><link href="/2016/222/migrate_to_jekyll.html" rel="alternate" type="text/html" title="（重新）迁移到Jekyll" /><published>2016-08-09T00:00:00+08:00</published><updated>2016-08-09T00:00:00+08:00</updated><id>/2016/222/migrate_to_jekyll</id><content type="html" xml:base="/2016/222/migrate_to_jekyll.html">&lt;h1 id=&quot;section&quot;&gt;前传&lt;/h1&gt;
+&lt;p&gt;今天先说到这里，之后会详细的谈谈开发环境的部署。&lt;/p&gt;</content><category term="Fuchsia" /><summary>对Fuchsia很感兴趣，今天编译一下，编译的过程记录在此。之后可能会玩一玩。</summary></entry><entry><title>（重新）迁移到Jekyll</title><link href="/2016/222/migrate_to_jekyll.html" rel="alternate" type="text/html" title="（重新）迁移到Jekyll" /><published>2016-08-09T00:00:00+08:00</published><updated>2016-08-09T00:00:00+08:00</updated><id>/2016/222/migrate_to_jekyll</id><content type="html" xml:base="/2016/222/migrate_to_jekyll.html">&lt;h1 id=&quot;section&quot;&gt;前传&lt;/h1&gt;
 &lt;p&gt;这博客大概两三年没有更新了，突然感觉是时候重新拾起来了。之前出于对Python的执念强行把生成器从Jekyll换成了Pelican。回头发现真还是Jekyll的社区比较发达，最终又重新换回了Jekyll，真是怨念啊。本篇博文就来说说配置Jekyll写作环境的事情。&lt;/p&gt;
 
 &lt;h1 id=&quot;jekyll&quot;&gt;配置Jekyll&lt;/h1&gt;

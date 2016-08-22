@@ -126,10 +126,12 @@ Reading time ~9 minutes
       </div><!-- /.header-title-wrap -->
     </header>
     <div class="entry-content">
-      <p>对Fuchsia很感兴趣，今天编译一下，编译的过程记录在此。之后可能会玩一玩。我使用的环境是Mac OS X 10.11，编译目标为x86_64。如果你也有兴趣，可以参照本文，也可以看一下官方编译的步骤文章<a href="https://fuchsia.googlesource.com/magenta/+/HEAD/docs/getting_started.md">Quick Start Recipes</a>和<a href="https://fuchsia.googlesource.com/manifest/+/master/README.md">Fuchsia Manifest</a></p>
+      <p>对Fuchsia很感兴趣，今天编译一下，编译的过程记录在此。之后可能会玩一玩。</p>
+
+<p>我使用的环境是Mac OS X 10.11，编译目标为x86_64。如果你也有兴趣，可以参照本文，也可以看一下官方的说明文档<a href="https://fuchsia.googlesource.com/magenta/+/HEAD/docs/getting_started.md">Quick Start Recipes</a>和<a href="https://fuchsia.googlesource.com/manifest/+/master/README.md">Fuchsia Manifest</a></p>
 
 <h1 id="section">准备工作</h1>
-<p>需要的东西主要有: Golang, git以及常见的工具链(bin-util make glibc之类)
+<p>需要的东西主要有: Golang, git以及常见的工具链(bin-util make glibc之类)<br />
 其中Golang和git可以在官网下载对应的安装包安装。工具链可以使用如下命令安装</p>
 
 <div class="language-bash highlighter-rouge"><pre class="highlight"><code>brew install wget pkg-config glib autoconf automake libtool
@@ -142,10 +144,11 @@ Reading time ~9 minutes
 </code></pre>
 </div>
 
-<p>PS：由于大多数代码都托管在已被封锁的Google上，如果身在国内你就需要一个VPN来完成代码的下载步骤。
-# 构建Magenta内核</p>
+<p>PS：由于大多数代码都托管在已被封锁的Google上，如果身在国内你就需要一个VPN来完成代码的下载步骤。</p>
 
-<h2 id="magenta">下载magenta</h2>
+<h1 id="magenta">构建Magenta内核</h1>
+
+<h2 id="magenta-1">下载magenta</h2>
 <p>从代码库克隆内核代码</p>
 
 <div class="highlighter-rouge"><pre class="highlight"><code>$ git clone https://fuchsia.googlesource.com/magenta $SRC/magenta
@@ -171,7 +174,7 @@ sudo make install
 </code></pre>
 </div>
 
-<h2 id="magenta-1">编译Magenta</h2>
+<h2 id="magenta-2">编译Magenta</h2>
 <p>先将工具链加入搜索路径</p>
 
 <div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="nb">export </span><span class="nv">PATH</span><span class="o">=</span><span class="nv">$PATH</span>:<span class="nv">$SRC</span>/toolchains/x86_64-elf-5.3.0-Darwin-x86_64/bin
