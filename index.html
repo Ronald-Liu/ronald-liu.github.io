@@ -126,6 +126,154 @@
   <header>
     
     <div class="entry-meta">
+      <span class="entry-date date published updated"><time datetime="2016-08-22T00:00:00+08:00"><a href="/2016/235/build_fuchsia.html">August 22, 2016</a></time></span><span class="author vcard"><span class="fn"><a href="/about/" title="About Ronald Liu">Ronald Liu</a></span></span>
+      
+      <span class="entry-reading-time">
+        <i class="fa fa-clock-o"></i>
+        
+Reading time ~9 minutes
+
+      </span><!-- /.entry-reading-time -->
+      
+    </div><!-- /.entry-meta -->
+    
+      <h1 class="entry-title"><a href="/2016/235/build_fuchsia.html" rel="bookmark" title="构建Fuchsia" itemprop="url">构建Fuchsia</a></h1>
+    
+  </header>
+  <div class="entry-content">
+    <p>对Fuchsia很感兴趣，今天编译一下，编译的过程记录在此。之后可能会玩一玩。我使用的环境是Mac OS X 10.11，编译目标为x86_64。如果你也有兴趣，可以参照本文，也可以看一下官方编译的步骤文章<a href="https://fuchsia.googlesource.com/magenta/+/HEAD/docs/getting_started.md">Quick Start Recipes</a>和<a href="https://fuchsia.googlesource.com/manifest/+/master/README.md">Fuchsia Manifest</a></p>
+
+<h1 id="section">准备工作</h1>
+<p>需要的东西主要有: Golang, git以及常见的工具链(bin-util make glibc之类)
+其中Golang和git可以在官网下载对应的安装包安装。工具链可以使用如下命令安装</p>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>brew install wget pkg-config glib autoconf automake libtool
+</code></pre>
+</div>
+
+<p>为了方便，我们可以先设置SRC环境变量，所有的Fuchsia代码都放在这里面。</p>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="nv">SRC</span><span class="o">=</span><span class="s2">"~/build-fuchsia/"</span>
+</code></pre>
+</div>
+
+<p>PS：由于大多数代码都托管在已被封锁的Google上，如果身在国内你就需要一个VPN来完成代码的下载步骤。
+# 构建Magenta内核</p>
+
+<h2 id="magenta">下载magenta</h2>
+<p>从代码库克隆内核代码</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>$ git clone https://fuchsia.googlesource.com/magenta $SRC/magenta
+</code></pre>
+</div>
+
+<h2 id="section-1">安装工具链</h2>
+<p>切换到magenta工作目录。执行</p>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>./scripts/download-toolchain
+</code></pre>
+</div>
+
+<h2 id="qemu">编译Qemu</h2>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="nb">cd</span> <span class="nv">$SRC</span>
+git clone https://fuchsia.googlesource.com/third_party/qemu
+<span class="nb">cd </span>qemu
+git checkout fuchsia
+./configure --target-list<span class="o">=</span>x86_64-softmmu
+make -j16
+sudo make install
+</code></pre>
+</div>
+
+<h2 id="magenta-1">编译Magenta</h2>
+<p>先将工具链加入搜索路径</p>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="nb">export </span><span class="nv">PATH</span><span class="o">=</span><span class="nv">$PATH</span>:<span class="nv">$SRC</span>/toolchains/x86_64-elf-5.3.0-Darwin-x86_64/bin
+</code></pre>
+</div>
+
+<p>之后编译Magenta</p>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>make -j16 magenta-pc-x86-64
+</code></pre>
+</div>
+
+<h2 id="section-2">测试内核</h2>
+<p>在Magenta主目录下运行命令</p>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>./scripts/run-magenta-x86-64
+</code></pre>
+</div>
+
+<p>如果一切正常，该命令将启动一个Qemu虚拟机，并在其中引导Magenta内核。看到下面的界面就说明内核已经成功引导了。<img src="/images/magenta_running.png" alt="Magenta引导成功后的截图" /></p>
+
+<p>由于没有用户态程序，当前你几乎无法做任何操作。可以使用快捷键C-a x退出Qeum。</p>
+
+<h1 id="fuchsia">构建Fuchsia环境</h1>
+
+<h2 id="section-3">下载代码库</h2>
+<p>首先安装jiri。jiri是一个Google用来进行代码库管理的工具。安装它需要有Go 1.6以上版本和git</p>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="nb">cd</span> <span class="nv">$SRC</span>
+curl -s https://raw.githubusercontent.com/vanadium/go.jiri/master/scripts/bootstrap_jiri | bash -s fuchsia
+</code></pre>
+</div>
+
+<p>命令会返回一个需要加入PATH的路径，然后我们手动加入进来</p>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="nb">export </span><span class="nv">PATH</span><span class="o">=</span>/Users/ronald/fuchsia/.jiri_root/scripts:<span class="nv">$PATH</span>
+</code></pre>
+</div>
+
+<p>切换进fuchsia目录并下载依赖的工程</p>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>jiri import fuchsia https://fuchsia.googlesource.com/manifest
+jiri update
+</code></pre>
+</div>
+
+<h2 id="fuchsia-1">构建Fuchsia</h2>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>./packages/gn/gen.py
+./buildtools/ninja -C out/debug-x86-64
+</code></pre>
+</div>
+
+<p>本人的渣渣电脑用时不到30分钟，Ninja还是快啊。</p>
+
+<h1 id="section-4">启动</h1>
+<p>重新回到刚才Magenta所在的目录，然后执行命令</p>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>./scripts/run-magenta-x86-64 -x <span class="nv">$PATH</span>/fuchsia/out/debug-x86-64/user.bootfs
+</code></pre>
+</div>
+
+<p>完成引导后就能出现命令提示符<code class="highlighter-rouge">&gt;</code>。可以运行命令</p>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>fortune
+</code></pre>
+</div>
+
+<p>来看一下前人的智慧。我这里出现的是</p>
+
+<blockquote>
+  <p>If we have data, let’s look at data. If all we have are opinions, let’s go</p>
+
+  <p>– Jim Barksdale</p>
+</blockquote>
+
+<p>LOL</p>
+
+<p>今天先说到这里，之后会详细的谈谈开发环境的部署。</p>
+
+  </div><!-- /.entry-content -->
+</article><!-- /.hentry -->
+
+<article class="hentry">
+  <header>
+    
+    <div class="entry-meta">
       <span class="entry-date date published updated"><time datetime="2016-08-09T00:00:00+08:00"><a href="/2016/222/migrate_to_jekyll.html">August 09, 2016</a></time></span><span class="author vcard"><span class="fn"><a href="/about/" title="About Ronald Liu">Ronald Liu</a></span></span>
       
       <span class="entry-reading-time">
@@ -463,88 +611,6 @@ Reading time ~8 minutes
 <p>安装Python 2.7运行时环境<br />
 双击tcpdns.py<br />
 设置系统DNS为127.0.0.1</p>
-
-  </div><!-- /.entry-content -->
-</article><!-- /.hentry -->
-
-<article class="hentry">
-  <header>
-    
-    <div class="entry-meta">
-      <span class="entry-date date published updated"><time datetime="2012-12-25T00:00:00+08:00"><a href="/2012/360/how-tolinux.html">December 25, 2012</a></time></span><span class="author vcard"><span class="fn"><a href="/about/" title="About Ronald Liu">Ronald Liu</a></span></span>
-      
-      <span class="entry-reading-time">
-        <i class="fa fa-clock-o"></i>
-        
-Reading time ~9 minutes
-
-      </span><!-- /.entry-reading-time -->
-      
-    </div><!-- /.entry-meta -->
-    
-      <h1 class="entry-title"><a href="/2012/360/how-tolinux.html" rel="bookmark" title="在Linux下设置无线网络桥接" itemprop="url">在Linux下设置无线网络桥接</a></h1>
-    
-  </header>
-  <div class="entry-content">
-    <p>很多同学在说Linux下配置网络桥接不如Windows方便，如果要共享网络链接很麻烦。其实如果各位能到墙外查查看，很多博客都介绍了如何在Linux下做网络桥接的姿势和动作要领。这里为大家介绍一下。
-如果你遇到如下问题，这篇文章可以帮助你搞定。</p>
-
-<ul>
-  <li>
-    <p>对如何在Linux下进行桥接完全没有概念</p>
-  </li>
-  <li>
-    <p>在执行桥接命令时出现<code class="highlighter-rouge">cant add wlan0 to bridge br0: Operation not supported</code>。
-这是由于您的无线网卡没有处于AP模式。处于Managed模式的无线网卡无法进行桥接（不要挣扎了，Managed模式下的网卡没有足够多的信息做桥接，这是802.11规定的）。只要按如下所述使用hostapd即可解决问题</p>
-  </li>
-  <li>
-    <p>在执行<code class="highlighter-rouge">iwconfig wlan0 mode Master</code>时出现错误 <br />
-  Error for wireless request “Set Mode” (8B06) :
-      SET failed on device wlan0 ; Invalid argument.
-这说明您的网卡不支持硬件Master模式，您同样可以使用hostapd实现软Master模式解决问题。</p>
-  </li>
-  <li>
-    <p>正确设置之后主机无法访问互联网。您可能需要刷新系统原有的路由表，并在br0上，而不是eth0上启动dhcpcd(dhclient)</p>
-  </li>
-</ul>
-
-<h1 id="section">内核和内核支持</h1>
-<p>使用bridge功能需要内核支持，大多数预编译内核（如Fedora, Ubuntu等发行版默认安装的内核）都内建了bridge支持。在自编译内核中，你需要启用Networking support –&gt; Networking options –&gt; 802.1d Ethernet Bridging。如果编译为模块，可以通过<code class="highlighter-rouge">modprobe bridge</code>将其加载。内核编译的知识和姿势请自行Google。</p>
-
-<h1 id="hostapd">设置hostapd</h1>
-
-<p>我知道有大神可以打开原生的AP(Master)模式。但是不管您是否能通过iwconfig打开AP模式，我都建议使用hostapd设置。安装hostapd的方法请自行Google。大多数发行版可以使用软件包管理器安装。<br />
-要设置一个简单的AP需要配置设置文件，以及启动hostapd程序。大多数操作都需要在root用户下操作。<br />
-在你认为合适的地方建立内容如下所述，文件名不那么重要的文件^_^：</p>
-
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="nv">interface</span><span class="o">=</span>wlan0  
-<span class="nv">driver</span><span class="o">=</span>nl80211  
-<span class="nv">ssid</span><span class="o">=</span>MyAP  
-<span class="nv">channel</span><span class="o">=</span>1  
-</code></pre>
-</div>
-
-<p>这个文件使端口wlan0工作在1信道下，建立一个ssid为MyAP的热点。默认不启用加密。若需设置加密，或需要更多信息，请参考<a href="http://linuxwireless.org/en/users/Documentation/hostapd">这里</a><br />
-使用命令<code class="highlighter-rouge">sudo hostapd /path/to/config/file</code>启动hostapd，注意需要提供绝对路径。</p>
-
-<h1 id="section-1">建立设置网络桥接</h1>
-<p>网络桥接的配置需要使用brctl命令，在Gentoo下通过<code class="highlighter-rouge">sudo emerge -av bridge-utils</code>安装。
-下面这段命令用于建立一个名叫br0的网桥。并把 wlan0 和 eth0 加入网桥</p>
-
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code>ifconfig eth0 up  
-ifconfig wlan0 up  
-brctl addbr br0  
-brctl addif br0 eth0  
-brctl addif br0 wlan0  
-ifconfig br0 up  
-</code></pre>
-</div>
-
-<p>如果没有返回错误，桥接就已经成功了。</p>
-
-<h1 id="section-2">新的路由项</h1>
-<p>需要注意的是，在完成桥接设置后，你需要重新设置路由表，使得default指向br0而不是eth0。要做到这一点，最方便的做法（如果你在一个使用dhcp的网络环境下）是使用<code class="highlighter-rouge">dhcpcd -k eth0 &amp;&amp; dhcpcd br0</code>来重新设置路由。如果没有DHCP，那您需要手动删除eth0上绑定的IP地址，并在br0上进行设置，最后更改相应的路由表项。我假设如果您会手动配置网络，一定知道我在说什么^_*。<br />
-如果您想更方便的设置，wicd中可以在preference中将wired interface改为br0，然后使用wicd进行配置。如果您这么做，在网桥消失之后（比如重启计算机之后）您需要将刚才的设置改回eth0。</p>
 
   </div><!-- /.entry-content -->
 </article><!-- /.hentry -->

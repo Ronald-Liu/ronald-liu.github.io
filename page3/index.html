@@ -126,6 +126,98 @@
   <header>
     
     <div class="entry-meta">
+      <span class="entry-date date published updated"><time datetime="2011-08-19T00:00:00+08:00"><a href="/2011/231/gfwlistip.html">August 19, 2011</a></time></span><span class="author vcard"><span class="fn"><a href="/about/" title="About Ronald Liu">Ronald Liu</a></span></span>
+      
+      <span class="entry-reading-time">
+        <i class="fa fa-clock-o"></i>
+        
+Reading time ~8 minutes
+
+      </span><!-- /.entry-reading-time -->
+      
+    </div><!-- /.entry-meta -->
+    
+      <h1 class="entry-title"><a href="/2011/231/gfwlistip.html" rel="bookmark" title="一个用来把gfwList里网址转换成IP的脚本" itemprop="url">一个用来把gfwList里网址转换成IP的脚本</a></h1>
+    
+  </header>
+  <div class="entry-content">
+    <p>ZZJ于8月17日提出用gfwList的网址通过可信的DNS转换成IP，写入hosts文件进而实现翻墙的方法。鄙人通过Python脚本进行了实现。代码丑陋望大牛指教。</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span><span class="nn">DNS</span><span class="o">,</span><span class="nn">base64</span>
+
+<span class="k">def</span> <span class="nf">splitList</span><span class="p">(</span><span class="n">txt</span><span class="p">):</span>
+	<span class="n">arr</span> <span class="o">=</span> <span class="n">txt</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">)</span>
+	
+	<span class="n">l</span> <span class="o">=</span> <span class="p">[]</span>
+	<span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">arr</span><span class="p">:</span>
+		<span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)):</span> <span class="c">#empty line</span>
+			<span class="k">continue</span>
+		<span class="k">if</span> <span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s">"!"</span><span class="p">):</span> <span class="c">#Comment line</span>
+			<span class="k">continue</span>
+		<span class="k">elif</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span><span class="s">"@@"</span><span class="p">):</span><span class="c">#Forbidding line</span>
+			<span class="k">continue</span>
+		<span class="k">elif</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">"/"</span><span class="p">)</span><span class="o">!=-</span><span class="mi">1</span> <span class="ow">or</span> <span class="n">line</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">"*"</span><span class="p">)</span><span class="o">!=-</span><span class="mi">1</span><span class="p">):</span> <span class="c">#URL is ignored, only domains left</span>
+			<span class="k">continue</span>
+		
+		<span class="c">#In this case, domain name is irrelevant to protocol(http or https)</span>
+		<span class="k">elif</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span><span class="s">"||"</span><span class="p">):</span>
+			<span class="n">l</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">2</span><span class="p">:])</span>
+		<span class="k">elif</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s">"."</span><span class="p">):</span>
+			<span class="n">l</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">l</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+	
+	<span class="k">return</span> <span class="n">l</span>
+	
+	
+
+<span class="c">#Decode and decorate the input string</span>
+<span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">"gfwlist.txt"</span><span class="p">,</span><span class="s">"r"</span><span class="p">)</span>
+<span class="n">txt</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span><span class="s">""</span><span class="p">)</span>
+<span class="n">txt</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">decodestring</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span>
+
+<span class="n">domains</span> <span class="o">=</span> <span class="n">splitList</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span>
+
+<span class="c">#Set default DNS server</span>
+<span class="n">DNSServer</span><span class="o">=</span><span class="p">[</span><span class="s">'8.8.8.8'</span><span class="p">]</span>
+<span class="n">DNS</span><span class="o">.</span><span class="n">defaults</span><span class="p">[</span><span class="s">'server'</span><span class="p">]</span><span class="o">=</span><span class="n">DNSServer</span>
+
+<span class="n">DNS</span><span class="o">.</span><span class="n">DiscoverNameServers</span><span class="p">()</span>
+
+<span class="c">#These two varible are used to track the percentage of parsing process.</span>
+<span class="n">l</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">a</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">domains</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">domains</span><span class="p">:</span>
+	<span class="n">request</span><span class="o">=</span><span class="n">DNS</span><span class="o">.</span><span class="n">Request</span><span class="p">()</span>
+	<span class="k">try</span><span class="p">:</span>
+		<span class="n">result</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">req</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">line</span><span class="p">,</span><span class="n">qtype</span><span class="o">=</span><span class="s">"A"</span><span class="p">)</span>
+	<span class="k">except</span> <span class="n">DNS</span><span class="o">.</span><span class="n">Base</span><span class="o">.</span><span class="n">DNSError</span><span class="p">:</span>
+		<span class="n">msg</span><span class="o">=</span><span class="n">line</span><span class="o">+</span><span class="s">"</span><span class="se">\t</span><span class="s">Time Out</span><span class="se">\n</span><span class="s">"</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">answers</span><span class="p">):</span>
+			<span class="n">msg</span><span class="o">=</span><span class="n">line</span><span class="o">+</span><span class="s">"</span><span class="se">\t</span><span class="s">No record</span><span class="se">\n</span><span class="s">"</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">msg</span><span class="o">=</span><span class="n">line</span><span class="o">+</span> <span class="s">"</span><span class="se">\t</span><span class="s">Bingo</span><span class="se">\n</span><span class="s">"</span>
+			<span class="k">print</span> <span class="n">line</span> <span class="o">+</span> <span class="s">" "</span> <span class="o">+</span> <span class="n">result</span><span class="o">.</span><span class="n">answers</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s">"data"</span><span class="p">]</span>
+	<span class="k">print</span> <span class="o">&gt;&gt;</span> <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span> <span class="n">line</span> <span class="o">+</span> <span class="n">msg</span><span class="p">,</span> <span class="n">l</span><span class="o">*</span><span class="mf">1.0</span><span class="o">/</span><span class="n">a</span><span class="p">,</span> <span class="s">"</span><span class="si">%</span><span class="s">"</span></code></pre></figure>
+
+<p>文中使用了模块pyDNS,这一非标准模块需要到http://pydns.sourceforge.net/下载。<br />
+解压后安装，<code class="highlighter-rouge">python setup.py install</code> 
+然后运行程序，只需要将标准输出重定向到指定文件即可。<code class="highlighter-rouge">python makeIP.py &gt; hosts</code><br />
+接一句Fvck GFW</p>
+
+<p>PS:21:51更新，增加了过滤CNAME记录的功能，解决有跳转网站的解析问题，请下载最新的代码文件</p>
+
+<p>2012-4-4:有些同学在问gfwList是用什么加密的，其实gfwList只是用Base64编码进行了压缩，只需要用相应的软件即可解码，详情请见维基百科。这个脚本里用的是Python中自带的base64模块。</p>
+
+  </div><!-- /.entry-content -->
+</article><!-- /.hentry -->
+
+<article class="hentry">
+  <header>
+    
+    <div class="entry-meta">
       <span class="entry-date date published updated"><time datetime="2011-04-30T00:00:00+08:00"><a href="/2011/120/stdcallcdecl.html">April 30, 2011</a></time></span><span class="author vcard"><span class="fn"><a href="/about/" title="About Ronald Liu">Ronald Liu</a></span></span>
       
       <span class="entry-reading-time">
